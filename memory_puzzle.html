@@ -8,13 +8,19 @@
     :root {
       /* === EASY CONFIG SECTION === */
       /* Stage 1: Pair‑matching memory */
-      --pairs: 8;             /* number of pairs (total cards = pairs × 2)  */
-      --stage1-time: 60;      /* seconds */
+      --pairs: 8;              /* number of pairs (total cards = pairs × 2)  */
+      --stage1-time: 60;       /* seconds */
 
       /* Stage 2: Sequence memory */
-      --seq-count: 6;         /* how many icons to memorise (2 ≤ N ≤ 16)  */
-      --memorise-time: 5;     /* seconds icons stay visible */
-      --stage2-time: 45;      /* seconds to recreate sequence */
+      --seq-count: 6;          /* how many icons to memorise (2 ≤ N ≤ 16)  */
+      --memorise-time: 5;      /* seconds icons stay visible */
+      --stage2-time: 45;       /* seconds to recreate sequence */
+
+      /* Stage 3: Simon‑style growing sequence */
+      --stage3-icons: 4;       /* number of distinct buttons */
+      --stage3-start-len: 3;   /* starting sequence length */
+      --stage3-show-time: 800; /* ms each icon flashes */
+      --stage3-max-level: 8;   /* finish after this level */
       /* =========================== */
     }
 
@@ -27,8 +33,7 @@
     button{ cursor:pointer; padding:0.6rem 1.2rem; border:none; border-radius:8px; font-size:1rem; background:#4f46e5; color:#fff; transition: background 0.2s; }
     button:hover{ background:#4338ca; }
 
-    .grid{ display:grid; gap:0.6rem; }
-    /* generate columns dynamically later */
+    .grid{ display:grid; gap:0.6rem; justify-items:center; }
 
     .card{
       position:relative; aspect-ratio:1/1; background:#e0e7ff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer; user-select:none; transition:transform 0.2s;
@@ -44,6 +49,14 @@
       position:fixed; inset:0; background:#0005; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; color:#fff; font-size:1.5rem; z-index:10; backdrop-filter:blur(3px);
     }
     #messageOverlay button{ background:#06b6d4; }
+
+    /* Stage 3 buttons */
+    .iconBtn{
+      font-size:2rem; background:#e0e7ff; padding:1rem; border-radius:10px; cursor:pointer; transition:transform 0.15s, background 0.15s; user-select:none;
+    }
+    .iconBtn.active{ background:#fde047; transform:scale(1.2); }
+    .iconBtn.disabled{ pointer-events:none; opacity:0.5; }
+    #levelInfo{ margin-top:0.5rem; text-align:center; font-weight:bold; }
   </style>
 </head>
 <body>
@@ -51,12 +64,12 @@
   <section id="menu">
     <h1>Web Puzzle Hub</h1>
     <p>Select a puzzle to start:</p>
-    <button id="startPuzzle1">Puzzle 1 – Double Memory</button>
+    <button id="startPuzzle1">Puzzle 1 – Triple Memory</button>
   </section>
 
   <!-- ===== Puzzle 1 Container ===== -->
   <section id="puzzle1" class="hidden">
-    <h2>Puzzle 1 – Double Memory</h2>
+    <h2>Puzzle 1 – Triple Memory</h2>
 
     <!-- Stage 1: Pair matching -->
     <article id="stage1" class="stage">
@@ -72,6 +85,14 @@
       <div id="timerStage2" class="timer hidden">⏳ <span id="time2"></span></div>
       <div id="grid2" class="grid"></div>
     </article>
+
+    <!-- Stage 3: Simon style -->
+    <article id="stage3" class="stage hidden">
+      <h3>Stage 3 – Simon Says</h3>
+      <p id="info3">Watch the sequence…</p>
+      <div id="grid3" class="grid"></div>
+      <div id="levelInfo">Level: <span id="levelNum"></span></div>
+    </article>
   </section>
 
   <!-- ===== Message Overlay ===== -->
@@ -84,7 +105,9 @@
   (()=>{
     /* ===== Utility ===== */
     const $ = sel => document.querySelector(sel);
+    const $$ = sel => document.querySelectorAll(sel);
     const shuffle = arr => arr.sort(()=>Math.random()-0.5);
+    const delay = ms => new Promise(res=>setTimeout(res, ms));
 
     /* ===== Emoji library for cards ===== */
     const EMOJI = [
@@ -97,8 +120,10 @@
     const puzzle1 = $('#puzzle1');
     const stage1 = $('#stage1');
     const stage2 = $('#stage2');
+    const stage3 = $('#stage3');
     const grid1 = $('#grid1');
     const grid2 = $('#grid2');
+    const grid3 = $('#grid3');
     const time1Span = $('#time1');
     const time2Span = $('#time2');
     const msgOverlay = $('#messageOverlay');
@@ -106,21 +131,29 @@
     const msgBtn = $('#messageBtn');
     const instr2 = $('#instructions2');
     const memoriseSecsSpan = $('#memoriseSecs');
+    const timerStage2El = $('#timerStage2');
+    const info3 = $('#info3');
+    const levelNum = $('#levelNum');
 
     /* ===== Config (CSS custom properties parsed as numbers) ===== */
     const cssNum = v=>+getComputedStyle(document.documentElement).getPropertyValue(v).trim();
     const config = {
-      pairs: cssNum('--pairs'), // pairs for stage1
+      pairs: cssNum('--pairs'),
       stage1Time: cssNum('--stage1-time'),
       seqCount: cssNum('--seq-count'),
       memoriseTime: cssNum('--memorise-time'),
-      stage2Time: cssNum('--stage2-time')
+      stage2Time: cssNum('--stage2-time'),
+      stage3Icons: cssNum('--stage3-icons'),
+      stage3StartLen: cssNum('--stage3-start-len'),
+      stage3Show: cssNum('--stage3-show-time'),
+      stage3Max: cssNum('--stage3-max-level')
     };
     memoriseSecsSpan.textContent = config.memoriseTime;
 
     /* ===== Game State ===== */
     let firstCard=null, lock=false, matched=0, timer1, timer2, timeLeft1, timeLeft2;
     let sequence=[], clickIndex=0;
+    let seq3=[], level=0, acceptingInput=false, buttons3=[];
 
     /* ===== Main Menu ===== */
     startBtn.addEventListener('click', () => {
@@ -140,15 +173,19 @@
       }
     }
 
-    /* ===== Stage 1 ===== */
+    /* ==========================================================
+       Stage 1 – Pair matching
+    ========================================================== */
     function startStage1(){
       // reset state
       grid1.innerHTML='';
       firstCard=null; lock=false; matched=0;
+      stage1.classList.remove('hidden');
+      stage2.classList.add('hidden');
+      stage3.classList.add('hidden');
       // prepare cards
       const icons = shuffle(EMOJI).slice(0, config.pairs);
       const deck = shuffle([...icons, ...icons]);
-      // grid columns (√)
       const cols = Math.ceil(Math.sqrt(deck.length));
       grid1.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
@@ -166,7 +203,7 @@
       clearInterval(timer1);
       timer1=setInterval(()=>{
         timeLeft1--; time1Span.textContent=timeLeft1;
-        if(timeLeft1<=0){ clearInterval(timer1); fail('Time\u00A0is\u00A0up! Try again?', startStage1); }
+        if(timeLeft1<=0){ clearInterval(timer1); fail('Time is up! Try again?', startStage1); }
       },1000);
     }
 
@@ -179,14 +216,12 @@
       }else{
         lock=true;
         if(firstCard.dataset.icon===card.dataset.icon){
-          // match
           firstCard.classList.add('matched');
           card.classList.add('matched');
           matched++;
           if(matched===config.pairs){ winStage1(); }
           resetPair();
         }else{
-          // no match
           setTimeout(()=>{
             firstCard.classList.remove('flipped');
             card.classList.remove('flipped');
@@ -197,30 +232,30 @@
         }
       }
     }
-
-    function resetPair(){ firstCard=null; lock=false; }
+    const resetPair=()=>{ firstCard=null; lock=false; };
 
     function winStage1(){
       clearInterval(timer1);
       showMsg('Great memory! Stage 1 complete. Ready for Stage 2?','Next',startStage2);
     }
 
-    function fail(msg, retryFn){
-      showMsg(msg,'Retry',()=>{
-        retryFn();
-      });
-    }
-
-    /* ===== Stage 2 ===== */
+    /* ==========================================================
+       Stage 2 – Sequence recall
+    ========================================================== */
     function startStage2(){
+      // reset UI
       stage1.classList.add('hidden');
       stage2.classList.remove('hidden');
+      stage3.classList.add('hidden');
       grid2.innerHTML='';
       clickIndex=0; sequence=[];
+      instr2.classList.remove('hidden');
+      timerStage2El.classList.add('hidden');
+      const oldPrompt=$('#promptIcon'); if(oldPrompt) oldPrompt.remove();
 
       // build unique icons for sequence
-      const icons = shuffle(EMOJI.filter(e=>!sequence.includes(e))).slice(0, config.seqCount);
-      sequence=[...icons]; // keep order
+      const icons = shuffle(EMOJI).slice(0, config.seqCount);
+      sequence=[...icons];
       const deck = shuffle([...icons]);
       const cols = Math.ceil(Math.sqrt(deck.length));
       grid2.style.gridTemplateColumns = `repeat(${cols},1fr)`;
@@ -228,22 +263,20 @@
         const card=document.createElement('div');
         card.className='card';
         card.dataset.icon=icon;
-        card.textContent=icon; // initially visible
+        card.textContent=icon;
         grid2.appendChild(card);
       });
 
       // Memorisation countdown
       let mem=config.memoriseTime;
       instr2.innerHTML=`Memorise the icons! <strong>${mem}</strong> s`;
-
       const memInterval=setInterval(()=>{
         mem--; instr2.innerHTML=`Memorise the icons! <strong>${mem}</strong> s`;
         if(mem<=0){
           clearInterval(memInterval);
-          // hide icons
           grid2.querySelectorAll('.card').forEach(c=>c.textContent='❔');
           instr2.classList.add('hidden');
-          $('#timerStage2').classList.remove('hidden');
+          timerStage2El.classList.remove('hidden');
           beginRecall();
         }
       },1000);
@@ -258,42 +291,117 @@
         if(timeLeft2<=0){ clearInterval(timer2); fail('Out of time! Try again?', startStage2); }
       },1000);
 
-      // Show prompt which icon to find (sequence[clickIndex])
+      // Prompt icon
       const prompt=document.createElement('div');
       prompt.id='promptIcon';
-      prompt.style.textAlign='center'; prompt.style.marginBottom='0.5rem'; prompt.innerHTML=`Find: <span style="font-size:2rem;">${sequence[clickIndex]}</span>`;
+      prompt.style.textAlign='center';
+      prompt.style.marginBottom='0.5rem';
+      prompt.innerHTML=`Find: <span style="font-size:2rem;">${sequence[clickIndex]}</span>`;
       stage2.insertBefore(prompt, grid2);
 
-      grid2.querySelectorAll('.card').forEach(card=>{
-        card.addEventListener('click',()=>handleRecall(card, prompt));
-      });
+      grid2.querySelectorAll('.card').forEach(card=>card.addEventListener('click',()=>handleRecall(card, prompt)));
     }
 
     function handleRecall(card, promptEl){
-      if(card.classList.contains('done')) return; // already found
+      if(card.classList.contains('done')) return;
       const expected=sequence[clickIndex];
       if(card.dataset.icon===expected){
-        card.textContent=card.dataset.icon; // reveal permanently
+        card.textContent=card.dataset.icon;
         card.classList.add('done');
         clickIndex++;
-        if(clickIndex===sequence.length){ winGame(); return; }
+        if(clickIndex===sequence.length){ winStage2(); return; }
         promptEl.innerHTML=`Find: <span style="font-size:2rem;">${sequence[clickIndex]}</span>`;
       }else{
-        // wrong pick
         clearInterval(timer2);
         fail('Wrong icon! Let’s try Stage 2 again?', startStage2);
       }
     }
 
-    function winGame(){
+    function winStage2(){
       clearInterval(timer2);
-      showMsg('🎉 Congratulations! You completed both stages!','Back to Menu',()=>{
-        stage2.classList.add('hidden');
-        stage1.classList.remove('hidden');
+      showMsg('Stage 2 complete – impressive! Ready for Stage 3?','Next',startStage3);
+    }
+
+    /* ==========================================================
+       Stage 3 – Simon style sequence
+    ========================================================== */
+    function startStage3(){
+      stage2.classList.add('hidden');
+      stage3.classList.remove('hidden');
+      grid3.innerHTML='';
+      seq3=[]; level=0; acceptingInput=false;
+
+      // pick distinct icons for buttons
+      const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
+      const cols = Math.ceil(Math.sqrt(icons.length));
+      grid3.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+      buttons3=[];
+      icons.forEach(icon=>{
+        const btn=document.createElement('div');
+        btn.className='iconBtn';
+        btn.dataset.icon=icon;
+        btn.textContent=icon;
+        btn.addEventListener('click',()=>handleSimonClick(btn));
+        grid3.appendChild(btn);
+        buttons3.push(btn);
+      });
+      nextLevel();
+    }
+
+    async function showSequence(){
+      acceptingInput=false;
+      buttons3.forEach(b=>b.classList.add('disabled'));
+      for(const icon of seq3){
+        const btn=buttons3.find(b=>b.dataset.icon===icon);
+        btn.classList.add('active');
+        await delay(config.stage3Show);
+        btn.classList.remove('active');
+        await delay(250);
+      }
+      buttons3.forEach(b=>b.classList.remove('disabled'));
+      acceptingInput=true;
+      info3.textContent='Your turn!';
+    }
+
+    function nextLevel(){
+      if(level===config.stage3Max){ return winGame(); }
+      info3.textContent='Watch the sequence…';
+      const rnd=buttons3[Math.floor(Math.random()*buttons3.length)].dataset.icon;
+      seq3.push(rnd);
+      level++;
+      levelNum.textContent=level;
+      showSequence();
+      playerIndex=0;
+    }
+
+    let playerIndex=0;
+    function handleSimonClick(btn){
+      if(!acceptingInput) return;
+      const expected=seq3[playerIndex];
+      if(btn.dataset.icon===expected){
+        btn.classList.add('active');
+        delay(200).then(()=>btn.classList.remove('active'));
+        playerIndex++;
+        if(playerIndex===seq3.length){
+          acceptingInput=false;
+          delay(600).then(nextLevel);
+        }
+      }else{
+        acceptingInput=false;
+        fail('Oops, wrong order! Try Stage 3 again?', startStage3);
+      }
+    }
+
+    function winGame(){
+      showMsg('🎉 You conquered all three stages!','Back to Menu',()=>{
         puzzle1.classList.add('hidden');
+        stage1.classList.remove('hidden');
+        stage2.classList.add('hidden');
+        stage3.classList.add('hidden');
         menu.classList.remove('hidden');
       });
     }
+
   })();
   </script>
 </body>
