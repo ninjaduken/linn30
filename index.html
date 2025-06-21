@@ -64,12 +64,12 @@
   <section id="menu">
     <h1>Web Puzzle Hub</h1>
     <p>Select a puzzle to start:</p>
-    <button id="startPuzzle1">Puzzle 1 – Triple Memory</button>
+    <button id="startPuzzle1">Puzzle 1 – Memory</button>
   </section>
 
-  <!-- ===== Puzzle 1 Container ===== -->
+<!-- ===== Puzzle 1 Container ===== -->
   <section id="puzzle1" class="hidden">
-    <h2>Puzzle 1 – Triple Memory</h2>
+    <h2>Puzzle 1 – Double Memory</h2>
 
     <!-- Stage 1: Pair matching -->
     <article id="stage1" class="stage">
@@ -176,16 +176,14 @@
     /* ==========================================================
        Stage 1 – Pair matching
     ========================================================== */
-    function startStage1(){
+     function startStage1(){
       // reset state
       grid1.innerHTML='';
       firstCard=null; lock=false; matched=0;
-      stage1.classList.remove('hidden');
-      stage2.classList.add('hidden');
-      stage3.classList.add('hidden');
       // prepare cards
       const icons = shuffle(EMOJI).slice(0, config.pairs);
       const deck = shuffle([...icons, ...icons]);
+      // grid columns (√)
       const cols = Math.ceil(Math.sqrt(deck.length));
       grid1.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
 
@@ -203,7 +201,7 @@
       clearInterval(timer1);
       timer1=setInterval(()=>{
         timeLeft1--; time1Span.textContent=timeLeft1;
-        if(timeLeft1<=0){ clearInterval(timer1); fail('Time is up! Try again?', startStage1); }
+        if(timeLeft1<=0){ clearInterval(timer1); fail('Time\u00A0is\u00A0up! Try again?', startStage1); }
       },1000);
     }
 
@@ -216,12 +214,14 @@
       }else{
         lock=true;
         if(firstCard.dataset.icon===card.dataset.icon){
+          // match
           firstCard.classList.add('matched');
           card.classList.add('matched');
           matched++;
           if(matched===config.pairs){ winStage1(); }
           resetPair();
         }else{
+          // no match
           setTimeout(()=>{
             firstCard.classList.remove('flipped');
             card.classList.remove('flipped');
@@ -232,11 +232,18 @@
         }
       }
     }
-    const resetPair=()=>{ firstCard=null; lock=false; };
+
+    function resetPair(){ firstCard=null; lock=false; }
 
     function winStage1(){
       clearInterval(timer1);
       showMsg('Great memory! Stage 1 complete. Ready for Stage 2?','Next',startStage2);
+    }
+
+    function fail(msg, retryFn){
+      showMsg(msg,'Retry',()=>{
+        retryFn();
+      });
     }
 
     /* ==========================================================
