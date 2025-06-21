@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Puzzle Hub</title>
+  <style>
+    :root {
+      /* === EASY CONFIG SECTION === */
+      /* Stage 1: Pair‑matching memory */
+      --pairs: 8;             /* number of pairs (total cards = pairs × 2)  */
+      --stage1-time: 60;      /* seconds */
+
+      /* Stage 2: Sequence memory */
+      --seq-count: 6;         /* how many icons to memorise (2 ≤ N ≤ 16)  */
+      --memorise-time: 5;     /* seconds icons stay visible */
+      --stage2-time: 45;      /* seconds to recreate sequence */
+      /* =========================== */
+    }
+
+    * { box-sizing:border-box; font-family: system-ui, sans-serif; }
+    body { margin:0; padding:2rem; display:flex; flex-direction:column; align-items:center; background:#f8f8fb; color:#222; min-height:100vh; }
+    h1,h2{ margin-top:0; text-align:center; }
+
+    #menu, #puzzle1 { width:100%; max-width:600px; }
+
+    button{ cursor:pointer; padding:0.6rem 1.2rem; border:none; border-radius:8px; font-size:1rem; background:#4f46e5; color:#fff; transition: background 0.2s; }
+    button:hover{ background:#4338ca; }
+
+    .grid{ display:grid; gap:0.6rem; }
+    /* generate columns dynamically later */
+
+    .card{
+      position:relative; aspect-ratio:1/1; background:#e0e7ff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer; user-select:none; transition:transform 0.2s;
+    }
+    .card.flipped{ background:#fff; transform:scale(0.95); }
+    .card.matched{ background:#bbf7d0; cursor:default; }
+
+    #timer{ font-weight:bold; margin-bottom:1rem; text-align:center; }
+
+    .hidden{ display:none !important; }
+
+    #messageOverlay{
+      position:fixed; inset:0; background:#0005; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; color:#fff; font-size:1.5rem; z-index:10; backdrop-filter:blur(3px);
+    }
+    #messageOverlay button{ background:#06b6d4; }
+  </style>
+</head>
+<body>
+  <!-- ===== Main Menu ===== -->
+  <section id="menu">
+    <h1>Web Puzzle Hub</h1>
+    <p>Select a puzzle to start:</p>
+    <button id="startPuzzle1">Puzzle 1 – Double Memory</button>
+  </section>
+
+  <!-- ===== Puzzle 1 Container ===== -->
+  <section id="puzzle1" class="hidden">
+    <h2>Puzzle 1 – Double Memory</h2>
+
+    <!-- Stage 1: Pair matching -->
+    <article id="stage1" class="stage">
+      <h3>Stage 1 – Find all pairs</h3>
+      <div id="timerStage1" class="timer">⏳ <span id="time1"></span></div>
+      <div id="grid1" class="grid"></div>
+    </article>
+
+    <!-- Stage 2: Sequence recall -->
+    <article id="stage2" class="stage hidden">
+      <h3>Stage 2 – Recall the sequence</h3>
+      <div id="instructions2">Memorise the icons! You have <span id="memoriseSecs"></span> seconds.</div>
+      <div id="timerStage2" class="timer hidden">⏳ <span id="time2"></span></div>
+      <div id="grid2" class="grid"></div>
+    </article>
+  </section>
+
+  <!-- ===== Message Overlay ===== -->
+  <div id="messageOverlay" class="hidden">
+    <div id="messageText"></div>
+    <button id="messageBtn">Continue</button>
+  </div>
+
+  <script>
+  (()=>{
+    /* ===== Utility ===== */
+    const $ = sel => document.querySelector(sel);
+    const shuffle = arr => arr.sort(()=>Math.random()-0.5);
+
+    /* ===== Emoji library for cards ===== */
+    const EMOJI = [
+      '🐶','🐱','🦊','🐼','🐸','🐵','🐧','🦄','🐙','🐝','🦋','🐢','🍎','🍋','🍇','🍓','🥑','🥕','🍕','🍪','⚽','🏀','🎲','🎹','🚗','✈️','🚀','🌈','⭐','🔥','❄️','💎','🎁'
+    ];
+
+    /* ===== Elements ===== */
+    const startBtn = $('#startPuzzle1');
+    const menu = $('#menu');
+    const puzzle1 = $('#puzzle1');
+    const stage1 = $('#stage1');
+    const stage2 = $('#stage2');
+    const grid1 = $('#grid1');
+    const grid2 = $('#grid2');
+    const time1Span = $('#time1');
+    const time2Span = $('#time2');
+    const msgOverlay = $('#messageOverlay');
+    const msgText = $('#messageText');
+    const msgBtn = $('#messageBtn');
+    const instr2 = $('#instructions2');
+    const memoriseSecsSpan = $('#memoriseSecs');
+
+    /* ===== Config (CSS custom properties parsed as numbers) ===== */
+    const cssNum = v=>+getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+    const config = {
+      pairs: cssNum('--pairs'), // pairs for stage1
+      stage1Time: cssNum('--stage1-time'),
+      seqCount: cssNum('--seq-count'),
+      memoriseTime: cssNum('--memorise-time'),
+      stage2Time: cssNum('--stage2-time')
+    };
+    memoriseSecsSpan.textContent = config.memoriseTime;
+
+    /* ===== Game State ===== */
+    let firstCard=null, lock=false, matched=0, timer1, timer2, timeLeft1, timeLeft2;
+    let sequence=[], clickIndex=0;
+
+    /* ===== Main Menu ===== */
+    startBtn.addEventListener('click', () => {
+      menu.classList.add('hidden');
+      puzzle1.classList.remove('hidden');
+      startStage1();
+    });
+
+    /* ===== Overlay helpers ===== */
+    function showMsg(text,btnText='OK',onClose){
+      msgText.innerHTML = text;
+      msgBtn.textContent = btnText;
+      msgOverlay.classList.remove('hidden');
+      msgBtn.onclick = ()=>{
+        msgOverlay.classList.add('hidden');
+        onClose && onClose();
+      }
+    }
+
+    /* ===== Stage 1 ===== */
+    function startStage1(){
+      // reset state
+      grid1.innerHTML='';
+      firstCard=null; lock=false; matched=0;
+      // prepare cards
+      const icons = shuffle(EMOJI).slice(0, config.pairs);
+      const deck = shuffle([...icons, ...icons]);
+      // grid columns (√)
+      const cols = Math.ceil(Math.sqrt(deck.length));
+      grid1.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+
+      deck.forEach(icon=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.dataset.icon=icon;
+        card.addEventListener('click',()=>handleFlip(card));
+        grid1.appendChild(card);
+      });
+
+      // timer
+      timeLeft1=config.stage1Time;
+      time1Span.textContent=timeLeft1;
+      clearInterval(timer1);
+      timer1=setInterval(()=>{
+        timeLeft1--; time1Span.textContent=timeLeft1;
+        if(timeLeft1<=0){ clearInterval(timer1); fail('Time\u00A0is\u00A0up! Try again?', startStage1); }
+      },1000);
+    }
+
+    function handleFlip(card){
+      if(lock||card===firstCard||card.classList.contains('matched')) return;
+      card.classList.add('flipped');
+      card.textContent=card.dataset.icon;
+      if(!firstCard){
+        firstCard=card;
+      }else{
+        lock=true;
+        if(firstCard.dataset.icon===card.dataset.icon){
+          // match
+          firstCard.classList.add('matched');
+          card.classList.add('matched');
+          matched++;
+          if(matched===config.pairs){ winStage1(); }
+          resetPair();
+        }else{
+          // no match
+          setTimeout(()=>{
+            firstCard.classList.remove('flipped');
+            card.classList.remove('flipped');
+            firstCard.textContent='';
+            card.textContent='';
+            resetPair();
+          },700);
+        }
+      }
+    }
+
+    function resetPair(){ firstCard=null; lock=false; }
+
+    function winStage1(){
+      clearInterval(timer1);
+      showMsg('Great memory! Stage 1 complete. Ready for Stage 2?','Next',startStage2);
+    }
+
+    function fail(msg, retryFn){
+      showMsg(msg,'Retry',()=>{
+        retryFn();
+      });
+    }
+
+    /* ===== Stage 2 ===== */
+    function startStage2(){
+      stage1.classList.add('hidden');
+      stage2.classList.remove('hidden');
+      grid2.innerHTML='';
+      clickIndex=0; sequence=[];
+
+      // build unique icons for sequence
+      const icons = shuffle(EMOJI.filter(e=>!sequence.includes(e))).slice(0, config.seqCount);
+      sequence=[...icons]; // keep order
+      const deck = shuffle([...icons]);
+      const cols = Math.ceil(Math.sqrt(deck.length));
+      grid2.style.gridTemplateColumns = `repeat(${cols},1fr)`;
+      deck.forEach(icon=>{
+        const card=document.createElement('div');
+        card.className='card';
+        card.dataset.icon=icon;
+        card.textContent=icon; // initially visible
+        grid2.appendChild(card);
+      });
+
+      // Memorisation countdown
+      let mem=config.memoriseTime;
+      instr2.innerHTML=`Memorise the icons! <strong>${mem}</strong> s`;
+
+      const memInterval=setInterval(()=>{
+        mem--; instr2.innerHTML=`Memorise the icons! <strong>${mem}</strong> s`;
+        if(mem<=0){
+          clearInterval(memInterval);
+          // hide icons
+          grid2.querySelectorAll('.card').forEach(c=>c.textContent='❔');
+          instr2.classList.add('hidden');
+          $('#timerStage2').classList.remove('hidden');
+          beginRecall();
+        }
+      },1000);
+    }
+
+    function beginRecall(){
+      // Timer
+      timeLeft2=config.stage2Time; time2Span.textContent=timeLeft2;
+      clearInterval(timer2);
+      timer2=setInterval(()=>{
+        timeLeft2--; time2Span.textContent=timeLeft2;
+        if(timeLeft2<=0){ clearInterval(timer2); fail('Out of time! Try again?', startStage2); }
+      },1000);
+
+      // Show prompt which icon to find (sequence[clickIndex])
+      const prompt=document.createElement('div');
+      prompt.id='promptIcon';
+      prompt.style.textAlign='center'; prompt.style.marginBottom='0.5rem'; prompt.innerHTML=`Find: <span style="font-size:2rem;">${sequence[clickIndex]}</span>`;
+      stage2.insertBefore(prompt, grid2);
+
+      grid2.querySelectorAll('.card').forEach(card=>{
+        card.addEventListener('click',()=>handleRecall(card, prompt));
+      });
+    }
+
+    function handleRecall(card, promptEl){
+      if(card.classList.contains('done')) return; // already found
+      const expected=sequence[clickIndex];
+      if(card.dataset.icon===expected){
+        card.textContent=card.dataset.icon; // reveal permanently
+        card.classList.add('done');
+        clickIndex++;
+        if(clickIndex===sequence.length){ winGame(); return; }
+        promptEl.innerHTML=`Find: <span style="font-size:2rem;">${sequence[clickIndex]}</span>`;
+      }else{
+        // wrong pick
+        clearInterval(timer2);
+        fail('Wrong icon! Let’s try Stage 2 again?', startStage2);
+      }
+    }
+
+    function winGame(){
+      clearInterval(timer2);
+      showMsg('🎉 Congratulations! You completed both stages!','Back to Menu',()=>{
+        stage2.classList.add('hidden');
+        stage1.classList.remove('hidden');
+        puzzle1.classList.add('hidden');
+        menu.classList.remove('hidden');
+      });
+    }
+  })();
+  </script>
+</body>
+</html>
