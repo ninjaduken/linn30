@@ -246,27 +246,43 @@
     gap: 1rem;
     color: #00ff00;
   }
-  #serialPrompt, #decryptUI {
-    width: 100%;
-  }
-  #serialInput, #secretInput, .codeBox {
-    background: #002200;
-    color: #00ff00;
-    border: 1.5px solid #00ff00;
-    border-radius: 6px;
-    padding: 0.4rem;
-    font-family: 'Courier New', monospace;
-    font-size: 1.1rem;
-    outline-offset: 2px;
-  }
-  #secretInput {
-    width: 100%;
-    min-height: 100px;
-    resize: vertical;
-    margin-bottom: 1rem;
-    padding: 0.8rem;
-    line-height: 1.4;
-  }
+  #serialPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* centers children horizontally */
+  gap: 1rem;
+}
+
+#serialInput {
+  width: 60%;
+  max-width: 300px;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  border: 2px solid #00ff00;
+  background: #002200;
+  color: #00ff00;
+  text-align: center; /* centers the text inside input */
+}
+
+#serialSubmitBtn,
+#serialBackBtn {
+  background: #00ff00;
+  color: #000;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  width: 140px;
+  padding: 0.5rem 0;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#serialSubmitBtn:hover,
+#serialBackBtn:hover {
+  background: #00cc00;
+  color: #fff;
+}
   #secretOutput {
     background: #002200;
     border: 1.5px solid #00ff00;
@@ -290,6 +306,7 @@
     background: #00cc00;
     color: #fff;
   }
+
   button#backToMenuBtn {
     background: #00ff00;
     color: #000000;
@@ -301,15 +318,58 @@
     background: #00cc00;
     color: #fff;
   }
-  .codeBox {
-    width: 40px;
-    height: 40px;
-    text-align: center;
-    font-size: 1.6rem;
-    text-transform: uppercase;
-    margin-right: 0.3rem;
-    outline-offset: 2px;
-  }
+ decryptUI {
+  background-color: #2a2a2a; /* dark background for the section */
+  color: #eee; /* light text color */
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+#decryptUI input,
+#decryptUI textarea {
+  background-color: #444;  /* dark input background */
+  color: #eee;             /* light text */
+  border: 1px solid #666;  /* subtle border */
+  border-radius: 4px;
+  padding: 0.5rem;
+  font-size: 1rem;
+  font-family: monospace, monospace;
+  outline-offset: 2px;
+  transition: border-color 0.3s ease;
+}
+
+#decryptUI input,
+#decryptUI textarea {
+  background: #002200;          /* same as secretInput background */
+  color: #00ff00;               /* bright green text */
+  border: 1.5px solid #00ff00; /* bright green border */
+  border-radius: 8px;
+  padding: 0.6rem 1rem;
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  outline-offset: 2px;
+  transition: border-color 0.2s ease;
+}
+
+#decryptUI input:focus,
+#decryptUI textarea:focus {
+  border-color: #00cc00;        /* slightly brighter green on focus */
+  box-shadow: 0 0 6px #00cc00aa;
+  outline: none;
+}
+
+.codeBox {
+  width: 2.5rem;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-right: 0.4rem;
+  background-color: #002200;
+  color: #00ff00;
+  border: 1.5px solid #00ff00;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+}
   #codeWrap {
     display: flex;
     margin-bottom: 1rem;
@@ -327,17 +387,114 @@
   max-width: 90vw;
   font-size: 1.1rem;
 }
+
+#passwordContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 220px; /* same width as buttons for consistency */
+  max-width: 90vw;
+  margin: 0 auto 1rem auto; /* center and add bottom spacing */
+}
+
+#passwordContainer input {
+  flex: 1;
+  font-size: 1.1rem;
+}
+
+#passwordContainer button {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  width: auto;            /* width fits content */
+  min-width: 50px;        /* optional min width for consistency */
+}
+#secretOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(209, 67, 163, 0.9); /* semi-transparent pink */
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  z-index: 1000;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 0 20px #d147a3;
+}
+
+#secretOverlay input,
+#secretOverlay button {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  outline-offset: 2px;
+}
+
+#secretOverlay input {
+  width: 240px;
+  border: 2px solid #fff0f8;
+  background: #fff0f8;
+  color: #4a154b;
+}
+
+#secretOverlay button {
+  background: #d147a3;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#secretOverlay button:hover {
+  background: #ae3d8f;
+}
+
+#overlayError {
+  color: #ffccd9;
+  min-height: 1.5rem;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+button#backToMenuBtn {
+  background: #00ff00;
+  color: #000000;
+  font-weight: bold;
+  align-self: center;
+  width: 140px;
+}
+button#backToMenuBtn:hover {
+  background: #00cc00;
+  color: #fff;
+}
+
 </style>
 </head>
 <body>
 <!-- ===== Main Menu ===== -->
 <section id="menu">
   <h1>🎁 Web Puzzle Hub</h1>
-  <p>Select a puzzle or enter the secret password:</p>
   <button id="startPuzzle1">Puzzle 1 – Memory</button>
-  <input id="passwordInput" placeholder="Password" autocomplete="off" />
-  <button id="unlockSecret">Enter</button>
+  <button id="openSecretOverlay">Secret Page</button>
 </section>
+
+<!-- ===== Secret Password Overlay ===== -->
+<div id="secretOverlay" class="hidden">
+  <div class="overlayContent">
+    <h2>Enter Secret Password</h2>
+    <input id="overlayPasswordInput" type="password" placeholder="Password" autocomplete="off" />
+    <div id="overlayError" style="color:#f66; margin-top:0.5rem; min-height:1.2em;"></div>
+    <div style="margin-top:1rem;">
+      <button id="overlayEnterBtn">Enter</button>
+      <button id="overlayCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== Puzzle 1 Container ===== -->
 <section id="puzzle1" class="hidden">
@@ -349,6 +506,7 @@
     <div id="timerStage1">⏳ <span id="time1"></span></div>
     <div id="grid1" class="grid"></div>
   </article>
+  
 
   <!-- Stage 2: Locate emoji questions -->
   <article id="stage2" class="stage hidden">
@@ -370,11 +528,15 @@
 
 <!-- ===== Secret Page ===== -->
 <section id="secretPage" class="hidden">
+  <!-- Serial Prompt Section -->
   <div id="serialPrompt">
     <h2>🔐 Enter Serial Number</h2>
     <input id="serialInput" maxlength="10" autocomplete="off" />
     <button id="serialSubmitBtn">Submit</button>
+    <button id="serialBackBtn">Back to Menu</button>
   </div>
+
+  <!-- Decrypt UI (part of the secretPage!) -->
   <div id="decryptUI" class="hidden">
     <h2>💻 Decryption Terminal</h2>
     <div id="codeWrap">
@@ -397,7 +559,8 @@
 </div>
 
 <script>
-(() => {
+document.addEventListener('DOMContentLoaded', () => {
+
   // Util
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
@@ -411,8 +574,14 @@
 
   // Main menu buttons
   const startPuzzle1Btn = $('#startPuzzle1');
-  const passwordInput = $('#passwordInput');
-  const unlockSecretBtn = $('#unlockSecret');
+ // const passwordInput = $('#passwordInput');
+  //const unlockSecretBtn = $('#unlockSecret');
+  
+  const secretOverlay = $('#secretOverlay');
+  const overlayPasswordInput = $('#overlayPasswordInput');
+  const overlayEnterBtn = $('#overlayEnterBtn');
+  const overlayCancelBtn = $('#overlayCancelBtn');
+  const overlayError = $('#overlayError');
 
   // Puzzle 1 elements
   const stage1 = $('#stage1');
@@ -434,6 +603,7 @@
   const decryptUI = $('#decryptUI');
   const serialInput = $('#serialInput');
   const serialSubmitBtn = $('#serialSubmitBtn');
+  const serialBackBtn = $('#serialBackBtn');
   const backToMenuBtn = $('#backToMenuBtn');
   const codeBoxes = Array.from($$('.codeBox'));
   const secretInput = $('#secretInput');
@@ -456,6 +626,46 @@
     stage3Show: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-show-time').trim(),
     stage3Max: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-max-level').trim(),
   };
+  
+  // Buttons
+    const openSecretOverlayBtn = document.getElementById('openSecretOverlay');
+
+    openSecretOverlayBtn.onclick = () => {
+      overlayError.textContent = '';
+      overlayPasswordInput.value = '';
+      secretOverlay.classList.remove('hidden');
+      overlayPasswordInput.focus();
+    };
+
+    overlayEnterBtn.onclick = () => {
+      const val = overlayPasswordInput.value.trim();
+      if(val === 'X'){
+        secretOverlay.classList.add('hidden');
+        menu.classList.add('hidden');
+        secretPage.classList.remove('hidden');
+        document.body.classList.add('dark');
+      } else {
+        overlayError.textContent = 'Incorrect password, try again.';
+      }
+    };
+
+    overlayCancelBtn.onclick = () => {
+      secretOverlay.classList.add('hidden');
+    };
+
+    // Optional: Allow pressing Enter key to submit password
+    overlayPasswordInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        overlayEnterBtn.click();
+      }
+    });
+	
+	backToMenuBtn?.addEventListener('click', () => {
+  secretPage.classList.add('hidden');
+    document.body.classList.remove('dark');  // <-- ADD THIS LINE
+
+  showMenu();
+});
 
   // Emojis for puzzles
   const EMOJI = [
@@ -525,36 +735,44 @@
     startStage1();
   };
 
-  unlockSecretBtn.onclick = () => {
-    if (passwordInput.value.trim().toLowerCase() === 'kittylove2025') {
-      hideAll();
-      secretPage.classList.remove('hidden');
-      secretPage.classList.add('active');
-      document.body.classList.add('dark');
-      serialPrompt.classList.remove('hidden');
-      decryptUI.classList.add('hidden');
-      serialInput.value = '';
-      secretInput.value = '';
-      secretOutput.textContent = '';
-      codeBoxes.forEach(box => box.value = '');
-      serialInput.focus();
-    } else {
-      showMsg('Incorrect password. Try again!');
-    }
-  };
+
 
   /* ===== Secret Page Events ===== */
-  serialSubmitBtn.onclick = () => {
-    const val = serialInput.value.trim();
-    if (val === 'XXX') {
-      serialPrompt.classList.add('hidden');
-      decryptUI.classList.remove('hidden');
-      secretInput.focus();
-    } else {
-      showMsg('Wrong serial number. Returning to menu.', 'OK', showMenu);
-    }
-  };
-  backToMenuBtn.onclick = () => showMenu();
+serialSubmitBtn?.addEventListener('click', () => {
+  console.log('[serial] Submit clicked');
+  const val = serialInput.value.trim();
+  if (val === 'XXX') {
+    serialPrompt.classList.add('hidden');
+    decryptUI.classList.remove('hidden');
+    serialInput.value = '';
+  } else {
+    alert('Wrong serial number → back to menu');
+    secretPage.classList.add('hidden');
+    menu.classList.remove('hidden');
+    decryptUI.classList.add('hidden');
+    serialPrompt.classList.remove('hidden');
+    serialInput.value = '';
+  }
+});
+
+serialBackBtn?.addEventListener('click', () => {
+  console.log('[serial] Back clicked');
+
+  secretPage.classList.add('hidden');
+  menu.classList.remove('hidden');
+
+  decryptUI.classList.add('hidden');
+  serialPrompt.classList.remove('hidden');
+  serialInput.value = '';
+
+  document.body.classList.remove('dark');
+});
+
+serialInput?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    serialSubmitBtn?.click();
+  }
+});
 
   // Decrypt logic
   function updateDecrypt() {
