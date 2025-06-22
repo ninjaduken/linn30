@@ -9,8 +9,8 @@
   :root {
     --pairs: 2;
     --stage1-time: 60;
-    --seq-count: 10; /* number of questions in puzzle 2 */
-	--stage2-cards: 10; /* number of questions in puzzle 2 */
+    --seq-count: 4; /* number of questions in puzzle 2 */
+	--stage2-cards: 8; /* number of questions in puzzle 2 */
     --memorise-time: 5;
     --stage2-time: 60;
     --stage3-icons: 8;
@@ -980,7 +980,7 @@ serialInput?.addEventListener('keydown', e => {
     grid2.appendChild(card);
   });
 
-  instructions2.textContent = `Memorise the cards! You have ${config.memoriseTime} seconds.`;
+  instructions2.textContent = `Memorera korten! Du har ${config.memoriseTime} sekunder på dig.`;
   questionPrompt.textContent = '';
   timerStage2El.classList.add('hidden');
 
