@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>🎁 Web Puzzle Hub</title>
+<title>🎁Linn 30🎁</title>
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 2;
+    --pairs: 14;
     --stage1-time: 60;
-    --seq-count: 2; /* number of questions in puzzle 2 */
-    --memorise-time: 2;
-    --stage2-time: 45;
-    --stage3-icons: 4;
+    --seq-count: 12; /* number of questions in puzzle 2 */
+    --memorise-time: 3;
+    --stage2-time: 60;
+    --stage3-icons: 8;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
-    --stage3-max-level: 2;
+    --stage3-max-level: 10;
   }
   * {
     box-sizing: border-box;
@@ -122,7 +122,7 @@
   /* Timer style */
   #timerStage1, #timerStage2 {
     font-weight: 700;
-    font-size: 1.2rem;
+    font-size: 2rem;
     text-align: center;
     margin-bottom: 1rem;
     color: #b3396a;
@@ -174,12 +174,56 @@
   .card.done {
     cursor: default;
   }
+  
+  #questionPrompt {
+  margin-top: 1rem;
+  font-weight: bold;
+  text-align: center;
+  font-size: 4rem; /* Ensures emoji is large */
+  color: #a92c82;
+  line-height: 1.2;
+}
+.bigEmoji {
+  font-size: 4rem;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
 
   /* Stage 3 Simon style */
-  #grid3 {
-    margin-top: 1rem;
-    gap: 0.8rem;
-  }
+#stage3 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem; /* optional for spacing between children */
+}
+  
+#grid3, #info3, #levelInfo {
+  display: none;
+  font-family: inherit;
+  font-weight: 600;
+  color: #aa2e7a;
+  text-align: center;
+}
+
+#startStage3Btn {
+  display: block;
+  margin: 1.5rem auto 1rem auto; /* auto left and right margins centers block */
+  padding: 0.7rem 1.5rem;
+  font-size: 1.2rem;
+  background: #d147a3;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  max-width: 200px;
+  text-align: center;
+}
+
+#startStage3Btn:hover {
+  background: #ae3d8f;
+}
   .iconBtn {
     background: #ffadea;
     font-size: 2.6rem;
@@ -472,37 +516,41 @@ button#backToMenuBtn:hover {
   background: #00cc00;
   color: #fff;
 }
+#overlayText {
+  white-space: pre-line;
+  text-align: center;
+}
 
 </style>
 </head>
 <body>
 <!-- ===== Main Menu ===== -->
 <section id="menu">
-  <h1>🎁 Web Puzzle Hub</h1>
-  <button id="startPuzzle1">Puzzle 1 – Memory</button>
-  <button id="openSecretOverlay">Secret Page</button>
+  <h1>🎁 Happy Duck Palace 🎁</h1>
+  <button id="startPuzzle1">Pussel 1 – Memory</button>
+  <button id="openSecretOverlay">Secret Page!</button>
 </section>
 
 <!-- ===== Secret Password Overlay ===== -->
 <div id="secretOverlay" class="hidden">
   <div class="overlayContent">
-    <h2>Enter Secret Password</h2>
+    <h2>Mata in hemligt lösenord</h2>
     <input id="overlayPasswordInput" type="password" placeholder="Password" autocomplete="off" />
     <div id="overlayError" style="color:#f66; margin-top:0.5rem; min-height:1.2em;"></div>
     <div style="margin-top:1rem;">
-      <button id="overlayEnterBtn">Enter</button>
-      <button id="overlayCancelBtn">Cancel</button>
+      <button id="overlayEnterBtn">Fortsätt</button>
+      <button id="overlayCancelBtn">Avbryt</button>
     </div>
   </div>
 </div>
 
 <!-- ===== Puzzle 1 Container ===== -->
 <section id="puzzle1" class="hidden">
-  <h2>Puzzle 1 – Double Memory</h2>
+  <h2>Pussel 1 – Memory</h2>
 
   <!-- Stage 1: Pair matching -->
   <article id="stage1" class="stage">
-    <h3>Stage 1 – Find all pairs</h3>
+    <h3>Stage 1 – Hitta alla par</h3>
     <div id="timerStage1">⏳ <span id="time1"></span></div>
     <div id="grid1" class="grid"></div>
   </article>
@@ -510,8 +558,8 @@ button#backToMenuBtn:hover {
 
   <!-- Stage 2: Locate emoji questions -->
   <article id="stage2" class="stage hidden">
-    <h3>Stage 2 – Where is the emoji?</h3>
-    <div id="instructions2">Memorise the cards, then answer questions!</div>
+    <h3>Stage 2 – Vart är emojin?</h3>
+    <div id="instructions2">Memorera alla kort, och svara på frågorna</div>
     <div id="timerStage2" class="timer hidden">⏳ <span id="time2"></span></div>
     <div id="grid2" class="grid"></div>
     <div id="questionPrompt" style="margin-top:1rem; font-weight:bold; text-align:center; font-size:1.2rem; color:#a92c82;"></div>
@@ -519,8 +567,9 @@ button#backToMenuBtn:hover {
 
   <!-- Stage 3: Simon style -->
   <article id="stage3" class="stage hidden">
-    <h3>Stage 3 – Simon Says</h3>
-    <p id="info3">Watch the sequence…</p>
+    <h3>Stage 3 – Följa John</h3>
+    <p id="info3">Titta på ordningen</p>
+	<button id="startStage3Btn">Starta Stage 3</button>
     <div id="grid3" class="grid"></div>
     <div id="levelInfo">Level: <span id="levelNum"></span></div>
   </article>
@@ -530,10 +579,10 @@ button#backToMenuBtn:hover {
 <section id="secretPage" class="hidden">
   <!-- Serial Prompt Section -->
   <div id="serialPrompt">
-    <h2>🔐 Enter Serial Number</h2>
+    <h2>🔐 Skriv in Serial Number</h2>
     <input id="serialInput" maxlength="10" autocomplete="off" />
-    <button id="serialSubmitBtn">Submit</button>
-    <button id="serialBackBtn">Back to Menu</button>
+    <button id="serialSubmitBtn">Skicka</button>
+    <button id="serialBackBtn">Tillbaka till menyn</button>
   </div>
 
   <!-- Decrypt UI (part of the secretPage!) -->
@@ -548,7 +597,7 @@ button#backToMenuBtn:hover {
     </div>
     <textarea id="secretInput" placeholder="Encrypted text..."></textarea>
     <pre id="secretOutput"></pre>
-    <button id="backToMenuBtn">🔙 Back to Menu</button>
+    <button id="backToMenuBtn">🔙 Tillbaka till menyn</button>
   </div>
 </section>
 
@@ -574,8 +623,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Main menu buttons
   const startPuzzle1Btn = $('#startPuzzle1');
- // const passwordInput = $('#passwordInput');
-  //const unlockSecretBtn = $('#unlockSecret');
   
   const secretOverlay = $('#secretOverlay');
   const overlayPasswordInput = $('#overlayPasswordInput');
@@ -614,6 +661,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const overlayText = $('#overlayText');
   const overlayBtn = $('#overlayBtn');
 
+	//Password
+	
+	const puzzleConfig = {
+  password: 'X',
+  serialNumber: 'XXX',
+  secretPhrases: {
+    'klo aws qwerty bälkö': 'Ankan flyger i öst',
+    'zen fox leap delta': 'Räven smyger i gryningen'
+  }
+};
+
   // Config
   const config = {
     pairs: +getComputedStyle(document.documentElement).getPropertyValue('--pairs').trim(),
@@ -639,7 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     overlayEnterBtn.onclick = () => {
       const val = overlayPasswordInput.value.trim();
-      if(val === 'X'){
+      if(val === puzzleConfig.password){
         secretOverlay.classList.add('hidden');
         menu.classList.add('hidden');
         secretPage.classList.remove('hidden');
@@ -706,15 +764,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Helper: show overlay message
-  function showMsg(text, btnText='OK', onClose=null) {
-    overlayText.textContent = text;
-    overlayBtn.textContent = btnText;
-    overlay.classList.remove('hidden');
-    overlayBtn.onclick = () => {
-      overlay.classList.add('hidden');
-      if (onClose) onClose();
-    };
-  }
+function showMsg(text, btnText = 'OK', onClose = null) {
+  overlayText.innerHTML = text;  // Use innerHTML instead of textContent
+  overlayBtn.textContent = btnText;
+  overlay.classList.remove('hidden');
+  overlayBtn.onclick = () => {
+    overlay.classList.add('hidden');
+    if (onClose) onClose();
+  };
+}
 
   // Show/hide sections
   function hideAll() {
@@ -739,14 +797,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* ===== Secret Page Events ===== */
 serialSubmitBtn?.addEventListener('click', () => {
-  console.log('[serial] Submit clicked');
+
   const val = serialInput.value.trim();
-  if (val === 'XXX') {
+  if (val === puzzleConfig.serialNumber) {
     serialPrompt.classList.add('hidden');
     decryptUI.classList.remove('hidden');
     serialInput.value = '';
   } else {
-    alert('Wrong serial number → back to menu');
+    alert('Fel Serial Number → Tillbaka till menyn');
     secretPage.classList.add('hidden');
     menu.classList.remove('hidden');
     decryptUI.classList.add('hidden');
@@ -756,7 +814,6 @@ serialSubmitBtn?.addEventListener('click', () => {
 });
 
 serialBackBtn?.addEventListener('click', () => {
-  console.log('[serial] Back clicked');
 
   secretPage.classList.add('hidden');
   menu.classList.remove('hidden');
@@ -779,7 +836,7 @@ serialInput?.addEventListener('keydown', e => {
     const key = codeBoxes.map(box => box.value.toUpperCase()).join('');
     const input = secretInput.value;
     if (key === 'DUCKS') {
-      secretOutput.textContent = input === 'klo aws qwerty bälkö' ? 'Ankan flyger i öst' : '[unknown message]';
+	secretOutput.textContent = puzzleConfig.secretPhrases[input] || '[unknown message]';
     } else {
       // Fake decrypt: XOR each char with 7
       secretOutput.textContent = '▓▒░ ' + input.split('').map(ch => String.fromCharCode(ch.charCodeAt(0)^7)).join('') + ' ░▒▓';
@@ -864,7 +921,7 @@ serialInput?.addEventListener('keydown', e => {
       lock = false;
       if (matched === config.pairs * 2) {
         clearInterval(timer1);
-        showMsg('Stage 1 complete! Moving to Stage 2...', 'Next', startStage2);
+        showMsg('Steg 1 avklarat! Går över till Steg 2...', 'Nästa', startStage2);
       }
     } else {
       // Not matched, flip back after delay
@@ -880,7 +937,7 @@ serialInput?.addEventListener('keydown', e => {
     }
   }
   function failStage1() {
-    showMsg('Time is up! Try Stage 1 again.', 'Retry', startStage1);
+    showMsg('Tiden är ute! Prova steg 1 igen', 'Starta om', startStage1);
   }
 
   /* ===== Puzzle 1 Stage 2 – Where is the emoji? ===== */
@@ -898,12 +955,14 @@ serialInput?.addEventListener('keydown', e => {
   clearInterval(timer2);
   lock = false;
 
+  // Reset Puzzle 2 state
   questionCurrentIndex = 0;
   questionsAsked = 0;
   questionMax = config.seqCount;
+  answeredCards = new Set();
 
   // Prepare cards
-  const totalCards = config.pairs;
+  const totalCards = config.seqCount;
   const selectedEmojis = shuffle(EMOJI).slice(0, totalCards);
   cardPositions = selectedEmojis.slice(); // stable order
 
@@ -939,7 +998,7 @@ function failStage2() {
   clearInterval(memoriseTimer);
   clearInterval(timer2);
   lock = false;
-  showMsg('Time is up or wrong card! Try Stage 2 again.', 'Retry', startStage2);
+  showMsg('Tiden är ute eller fel kort valt! Prova steg 2 igen.', 'Starta om', startStage2);
 }
 
 function beginQuestionPhase() {
@@ -950,7 +1009,7 @@ function beginQuestionPhase() {
     card.style.background = '#f9d7e5';
     card.onclick = cardClickHandler;
   });
-  instructions2.textContent = 'Where is this emoji? Click the correct card.';
+  instructions2.textContent = 'Vart var den här emojin? Klicka på rätt kort.';
   timerStage2El.classList.remove('hidden');
   timeLeft2 = config.stage2Time;
   time2Span.textContent = timeLeft2 + 's';
@@ -975,11 +1034,11 @@ function beginQuestionPhase() {
 function askNextQuestion() {
   if (questionCurrentIndex >= questionSequence.length) {
     clearInterval(timer2);
-    showMsg('Stage 2 complete! Moving to Stage 3...', 'Next', startStage3);
+    showMsg('Steg 2 avklarat! Gå över till steg 3...', 'Nästa', startStage3);
     return;
   }
   const emojiToFind = questionSequence[questionCurrentIndex];
-  questionPrompt.textContent = `Where is this emoji? ${emojiToFind}`;
+  questionPrompt.innerHTML = `Where is this emoji? <span class="bigEmoji">${emojiToFind}</span>`;
 }
 
   
@@ -1010,20 +1069,20 @@ function cardClickHandler(e) {
 
     if (questionCurrentIndex >= questionSequence.length) {
       clearInterval(timer2);
-      showMsg('Stage 2 complete! Moving to Stage 3...', 'Next', startStage3);
+      showMsg('Stage 2 avklart! Nu börjar Stage 3...', 'Nästa', startStage3);
     } else {
       askNextQuestion();
     }
   } else {
     // Wrong
     playSound(196);
-    showMsg('Wrong card! Try Stage 2 again.', 'Retry', startStage2);
+    showMsg('Fel kort! Prova steg 2 igen.', 'Starta om', startStage2);
   }
 }
 
   function failStage2(){
     lock=false;clearInterval(timer2);
-    showMsg('Time up! Try again.','Retry',startStage2);
+    showMsg('Tiden är ute! Prova igen...','Starta om',startStage2);
   }
 
   /* ===== Puzzle 1 Stage 3 – Simon Says ===== */
@@ -1031,28 +1090,47 @@ function startStage3() {
   stage1.classList.add('hidden');
   stage2.classList.add('hidden');
   stage3.classList.remove('hidden');
-  
+
+  startStage3Btn.style.display = 'inline-block';  // Show start button
+  grid3.style.display = 'none';                    // Hide grid
+  info3.style.display = 'none';                    // Hide info text
+  document.getElementById('levelInfo').style.display = 'none'; // Hide level info
+
+  // Reset game state
   seq3 = [];
   level = 1;
   playerIndex = 0;
-  acceptingInput = false;  // start false while sequence is shown
+  acceptingInput = false;
   buttons3 = [];
   levelNum.textContent = level;
+}
 
+startStage3Btn.onclick = () => {
+  startStage3Btn.style.display = 'none';   // Hide start button
+  grid3.style.display = 'grid';             // Show grid
+  info3.style.display = 'block';            // Show info
+  document.getElementById('levelInfo').style.display = 'block'; // Show level info
+
+  levelNum.textContent = level;
   grid3.innerHTML = '';
   grid3.style.gridTemplateColumns = `repeat(${config.stage3Icons}, 1fr)`;
 
   const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
 
+  buttons3 = [];
   icons.forEach(icon => {
     const btn = document.createElement('button');
-    btn.className = 'iconBtn disabled'; // disabled initially
+    btn.className = 'iconBtn disabled'; 
     btn.textContent = icon;
     btn.dataset.icon = icon;
-    btn.disabled = false; // no HTML disabled attribute
-    
+    btn.disabled = false;
+	  startStage3Btn.style.display = 'none'; // Hide start button
+  info3.style.display = 'block';
+  grid3.style.display = 'grid';
+  levelNum.style.display = 'inline'; // or whatever shows level info
+
     btn.onclick = () => {
-      if (!acceptingInput) return;  // ignore if not accepting input
+      if (!acceptingInput) return;
       playSound(523);
       animatePress(btn);
       if (icon === seq3[playerIndex]) {
@@ -1060,7 +1138,11 @@ function startStage3() {
         if (playerIndex === seq3.length) {
           level++;
           if (level > config.stage3Max) {
-            showMsg('🎉 Congratulations! You completed all stages! 🎉', 'Finish', showMenu);
+		showMsg(
+				`🎉 Grattis! Du har klarat alla steg! 🎉\nLösenordet är:\n<strong>${puzzleConfig.password}</strong>`, 
+				'Avsluta', 
+				showMenu
+				);
             return;
           }
           levelNum.textContent = level;
@@ -1073,23 +1155,27 @@ function startStage3() {
         }
       } else {
         playSound(196);
-        showMsg('Wrong button! Try Stage 3 again.', 'Retry', startStage3);
+        showMsg('Wrong button! Try Stage 3 again.', 'Starta om', startStage3);
       }
     };
 
     buttons3.push(btn);
     grid3.appendChild(btn);
   });
-
-  nextSimonSequence();
-}
+ // Show “Get ready...” message
+  info3.textContent = 'Gör dig redo...';
+  setTimeout(() => {
+    info3.textContent = 'Titta på sekvensen…';
+    nextSimonSequence();
+  }, 1500); // 1.5 seconds delay before sequence starts
+};
 
 async function nextSimonSequence() {
   const availableIcons = buttons3.map(b => b.dataset.icon);
   const newIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
   seq3.push(newIcon);
 
-  info3.textContent = 'Watch the sequence…';
+  info3.textContent = 'Titta på sekvensen…';
   acceptingInput = false;
   buttons3.forEach(b => b.classList.add('disabled'));
 
@@ -1102,7 +1188,7 @@ async function nextSimonSequence() {
     await delay(250);
   }
 
-  info3.textContent = 'Your turn! Repeat the sequence.';
+  info3.textContent = 'Din tur! Repetera sekvensen';
   acceptingInput = true;
   buttons3.forEach(b => b.classList.remove('disabled'));
   playerIndex = 0;
