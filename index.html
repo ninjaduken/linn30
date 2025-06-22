@@ -7,9 +7,10 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 14;
+    --pairs: 2;
     --stage1-time: 60;
-    --seq-count: 12; /* number of questions in puzzle 2 */
+    --seq-count: 8; /* number of questions in puzzle 2 */
+	--stage2-cards: 12; /* number of questions in puzzle 2 */
     --memorise-time: 3;
     --stage2-time: 60;
     --stage3-icons: 8;
@@ -677,6 +678,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pairs: +getComputedStyle(document.documentElement).getPropertyValue('--pairs').trim(),
     stage1Time: +getComputedStyle(document.documentElement).getPropertyValue('--stage1-time').trim(),
     seqCount: +getComputedStyle(document.documentElement).getPropertyValue('--seq-count').trim(),
+	stage2Cards: +getComputedStyle(document.documentElement).getPropertyValue('--stage2-cards').trim(),
     memoriseTime: +getComputedStyle(document.documentElement).getPropertyValue('--memorise-time').trim(),
     stage2Time: +getComputedStyle(document.documentElement).getPropertyValue('--stage2-time').trim(),
     stage3Icons: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-icons').trim(),
@@ -962,7 +964,7 @@ serialInput?.addEventListener('keydown', e => {
   answeredCards = new Set();
 
   // Prepare cards
-  const totalCards = config.seqCount;
+  const totalCards = config.stage2Cards;
   const selectedEmojis = shuffle(EMOJI).slice(0, totalCards);
   cardPositions = selectedEmojis.slice(); // stable order
 
