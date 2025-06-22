@@ -7,16 +7,16 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 2;
+    --pairs: 2; /* 16 */
     --stage1-time: 60;
-    --seq-count: 1; /* number of questions in puzzle 2 */
+    --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 8; /* number of questions in puzzle 2 */
     --memorise-time: 5;
     --stage2-time: 60;
-    --stage3-icons: 10;
+    --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
-    --stage3-max-level: 12;
+    --stage3-max-level: 14;
   }
   * {
     box-sizing: border-box;
@@ -198,8 +198,18 @@
   align-items: center;
   gap: 1rem; /* optional for spacing between children */
 }
+
+#grid3 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+#grid3.hidden {
+  display: none;
+}
   
-#grid3, #info3, #levelInfo {
+#info3, #levelInfo {
   display: none;
   font-family: inherit;
   font-weight: 600;
@@ -1014,7 +1024,7 @@ function updateDecrypt() {
   let memTimeLeft = config.memoriseTime;
   memoriseTimer = setInterval(() => {
     memTimeLeft--;
-    instructions2.textContent = `Memorise the cards! You have ${memTimeLeft} second${memTimeLeft !== 1 ? 's' : ''}.`;
+    instructions2.textContent = `Spelet startar om ${memTimeLeft} sekunder.`;
     if (memTimeLeft <= 0) {
       clearInterval(memoriseTimer);
       beginQuestionPhase();
@@ -1120,7 +1130,7 @@ function startStage3() {
   stage3.classList.remove('hidden');
 
   startStage3Btn.style.display = 'inline-block';  // Show start button
-  grid3.style.display = 'none';                    // Hide grid
+grid3.classList.add('hidden');  // hide with class
   info3.style.display = 'none';                    // Hide info text
   document.getElementById('levelInfo').style.display = 'none'; // Hide level info
 
@@ -1135,13 +1145,13 @@ function startStage3() {
 
 startStage3Btn.onclick = () => {
   startStage3Btn.style.display = 'none';   // Hide start button
-  grid3.style.display = 'grid';             // Show grid
+grid3.classList.remove('hidden');  // show by removing hidden class
   info3.style.display = 'block';            // Show info
   document.getElementById('levelInfo').style.display = 'block'; // Show level info
 
   levelNum.textContent = level;
   grid3.innerHTML = '';
-  grid3.style.gridTemplateColumns = `repeat(${config.stage3Icons}, 1fr)`;
+// grid3.style.gridTemplateColumns = `repeat(4, 1fr)`;
 
   const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
 
@@ -1183,7 +1193,7 @@ startStage3Btn.onclick = () => {
         }
       } else {
         playSound(196);
-        showMsg('Wrong button! Try Stage 3 again.', 'Starta om', startStage3);
+        showMsg('Fel kort! Prova steg 3 igen.', 'Starta om', startStage3);
       }
     };
 
