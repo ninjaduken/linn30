@@ -7,16 +7,16 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 2;
+    --pairs: 16;
     --stage1-time: 60;
     --seq-count: 4; /* number of questions in puzzle 2 */
 	--stage2-cards: 8; /* number of questions in puzzle 2 */
     --memorise-time: 5;
     --stage2-time: 60;
-    --stage3-icons: 8;
+    --stage3-icons: 10;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
-    --stage3-max-level: 10;
+    --stage3-max-level: 12;
   }
   * {
     box-sizing: border-box;
@@ -394,6 +394,10 @@
   font-size: 1rem;
   outline-offset: 2px;
   transition: border-color 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  height: 100px;          /* optional, for consistency */
+  resize: vertical;       /* optional, lets user expand */
 }
 
 #decryptUI input:focus,
@@ -404,16 +408,21 @@
 }
 
 .codeBox {
-  width: 2.5rem;
   text-align: center;
-  font-weight: bold;
-  font-size: 1.2rem;
+  font-weight: 900;
+  font-size: 4rem !important;
+  padding: 0.5rem 0.625rem;
   margin-right: 0.4rem;
   background-color: #002200;
   color: #00ff00;
   border: 1.5px solid #00ff00;
   border-radius: 8px;
   font-family: 'Courier New', monospace;
+  
+  /* Remove width: 100%; */
+  width: 3.5rem;          /* Fixed width matching font size */
+  min-width: 3.5rem;      /* Ensure minimum width */
+  box-sizing: border-box; 
 }
   #codeWrap {
     display: flex;
@@ -583,7 +592,7 @@ button#backToMenuBtn:hover {
     <h2>🔐 Skriv in Serial Number</h2>
     <input id="serialInput" maxlength="10" autocomplete="off" />
     <button id="serialSubmitBtn">Skicka</button>
-    <button id="serialBackBtn">Tillbaka till menyn</button>
+    <button id="serialBackBtn">Tillbaka</button>
   </div>
 
   <!-- Decrypt UI (part of the secretPage!) -->
@@ -598,7 +607,7 @@ button#backToMenuBtn:hover {
     </div>
     <textarea id="secretInput" placeholder="Encrypted text..."></textarea>
     <pre id="secretOutput"></pre>
-    <button id="backToMenuBtn">🔙 Tillbaka till menyn</button>
+    <button id="backToMenuBtn">🔙 Tillbaka</button>
   </div>
 </section>
 
@@ -616,6 +625,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const $$ = s => document.querySelectorAll(s);
   const shuffle = a => a.sort(() => Math.random() - .5);
   const delay   = ms => new Promise(r=>setTimeout(r,ms));
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
   // Elements
   const menu = $('#menu');
@@ -667,8 +677,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	const puzzleConfig = {
   password: 'X',
   serialNumber: 'XXX',
+  //serialNumber: 'GGJ30X0V70',
   secretPhrases: {
-    'klo aws qwerty bälkö': 'Ankan flyger i öst',
+    'X X X': 'Ankan flyger i öst',
     'zen fox leap delta': 'Räven smyger i gryningen'
   }
 };
@@ -747,23 +758,34 @@ document.addEventListener('DOMContentLoaded', () => {
   let seq3 = [], level = 0, acceptingInput = false, buttons3 = [], playerIndex = 0;
 
   // Sound utility
-  function playSound(freq=440, duration=150) {
-    try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      osc.frequency.value = freq;
-      osc.type = 'triangle';
-      osc.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      osc.start();
-      gainNode.gain.setValueAtTime(0.2, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration/1000);
-      osc.stop(ctx.currentTime + duration/1000);
-    } catch(e) {
-      // AudioContext might be blocked, ignore
-    }
+  // Create the audio context once
+
+function playSound(freq = 440, duration = 150) {
+  try {
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.frequency.value = freq;
+    osc.type = 'triangle';
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    const now = audioCtx.currentTime;
+    gainNode.gain.setValueAtTime(0.2, now);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, now + duration / 1000);
+
+    osc.start(now);
+    osc.stop(now + duration / 1000);
+  } catch (e) {
+    console.warn("Audio error", e);
   }
+}
+
+// Ensure audio works on user interaction
+window.addEventListener('click', () => {
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+}, { once: true });
 
   // Helper: show overlay message
 function showMsg(text, btnText = 'OK', onClose = null) {
@@ -834,16 +856,20 @@ serialInput?.addEventListener('keydown', e => {
 });
 
   // Decrypt logic
-  function updateDecrypt() {
-    const key = codeBoxes.map(box => box.value.toUpperCase()).join('');
-    const input = secretInput.value;
-    if (key === 'DUCKS') {
-	secretOutput.textContent = puzzleConfig.secretPhrases[input] || '[unknown message]';
+function updateDecrypt() {
+  const key = codeBoxes.map(box => box.value.toUpperCase()).join('');
+  const input = secretInput.value.trim();
+  if (key === 'DUCKS' && input.length > 0) {
+    secretOutput.textContent = puzzleConfig.secretPhrases[input] || '[unknown message]';
+  } else {
+    // Fake decrypt: XOR each char with 7
+    if(input.length === 0){
+      secretOutput.textContent = ''; // Clear output if no input
     } else {
-      // Fake decrypt: XOR each char with 7
       secretOutput.textContent = '▓▒░ ' + input.split('').map(ch => String.fromCharCode(ch.charCodeAt(0)^7)).join('') + ' ░▒▓';
     }
   }
+}
   codeBoxes.forEach(box => box.addEventListener('input', updateDecrypt));
   secretInput.addEventListener('input', updateDecrypt);
 
