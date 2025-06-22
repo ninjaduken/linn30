@@ -8,11 +8,11 @@
     :root {
       /* === EASY CONFIG SECTION === */
       /* Stage 1: Pair‑matching memory */
-      --pairs: 4;              /* number of pairs (total cards = pairs × 2)  */
+      --pairs: 8;              /* number of pairs (total cards = pairs × 2)  */
       --stage1-time: 60;       /* seconds */
 
       /* Stage 2: Sequence memory */
-      --seq-count: 2;          /* how many icons to memorise (2 ≤ N ≤ 16)  */
+      --seq-count: 6;          /* how many icons to memorise (2 ≤ N ≤ 16)  */
       --memorise-time: 5;      /* seconds icons stay visible */
       --stage2-time: 45;       /* seconds to recreate sequence */
 
@@ -24,40 +24,104 @@
       /* =========================== */
     }
 
-    * { box-sizing:border-box; font-family: system-ui, sans-serif; }
-    body { margin:0; padding:2rem; display:flex; flex-direction:column; align-items:center; background:#f8f8fb; color:#222; min-height:100vh; }
-    h1,h2{ margin-top:0; text-align:center; }
-
-    #menu, #puzzle1 { width:100%; max-width:600px; }
-
-    button{ cursor:pointer; padding:0.6rem 1.2rem; border:none; border-radius:8px; font-size:1rem; background:#4f46e5; color:#fff; transition: background 0.2s; }
-    button:hover{ background:#4338ca; }
-
-	.grid{ display:grid; gap:0.6rem; }
-    /* generate columns dynamically later */
-	
-    .card{
-      position:relative; aspect-ratio:1/1; background:#e0e7ff; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:2rem; cursor:pointer; user-select:none; transition:transform 0.2s;
+    * { box-sizing: border-box; font-family: system-ui, sans-serif; }
+    body {
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f8f8fb;
+      color: #222;
+      min-height: 100vh;
     }
-    .card.flipped{ background:#fff; transform:scale(0.95); }
-    .card.matched{ background:#bbf7d0; cursor:default; }
 
-    #timer{ font-weight:bold; margin-bottom:1rem; text-align:center; }
+    h1, h2 { margin-top: 0; text-align: center; }
 
-    .hidden{ display:none !important; }
+    #menu, #puzzle1 { width: 100%; max-width: 600px; }
 
-    #messageOverlay{
-      position:fixed; inset:0; background:#0005; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; color:#fff; font-size:1.5rem; z-index:10; backdrop-filter:blur(3px);
+    button {
+      cursor: pointer;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: #4f46e5;
+      color: #fff;
+      transition: background 0.2s;
     }
-    #messageOverlay button{ background:#06b6d4; }
+    button:hover { background: #4338ca; }
+
+    /* ===== Layout helpers ===== */
+    .grid { display: grid; gap: 0.6rem; }
+    .hidden { display: none !important; }
+
+    /* ===== Cards ===== */
+    .card {
+      position: relative;
+      aspect-ratio: 1/1;
+      background: #e0e7ff;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.2s;
+    }
+    .card.flipped    { background: #fff; transform: scale(0.95); }
+    .card.matched    { background: #bbf7d0; cursor: default; }
+
+    #timer { font-weight: bold; margin-bottom: 1rem; text-align: center; }
+
+    /* ===== Overlay ===== */
+    #messageOverlay {
+      position: fixed;
+      inset: 0;
+      background: #0005;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: #fff;
+      font-size: 1.5rem;
+      z-index: 10;
+      backdrop-filter: blur(3px);
+    }
+    #messageOverlay button { background: #06b6d4; }
 
     /* Stage 3 buttons */
-    .iconBtn{
-      font-size:2rem; background:#e0e7ff; padding:1rem; border-radius:10px; cursor:pointer; transition:transform 0.15s, background 0.15s; user-select:none;
+    .iconBtn {
+      font-size: 2rem;
+      background: #e0e7ff;
+      padding: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+      user-select: none;
     }
-    .iconBtn.active{ background:#fde047; transform:scale(1.2); }
-    .iconBtn.disabled{ pointer-events:none; opacity:0.5; }
-    #levelInfo{ margin-top:0.5rem; text-align:center; font-weight:bold; }
+    .iconBtn.active   { background: #fde047; transform: scale(1.2); }
+    .iconBtn.disabled { pointer-events: none; opacity: 0.5; }
+    #levelInfo        { margin-top: 0.5rem; text-align: center; font-weight: bold; }
+
+    /* ===== Unlock area ===== */
+    #unlockArea {
+      margin-top: 1rem;
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+    }
+    #unlockArea input {
+      flex: 1 1 140px;
+      padding: 0.6rem 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -66,9 +130,18 @@
     <h1>Web Puzzle Hub</h1>
     <p>Select a puzzle to start:</p>
     <button id="startPuzzle1">Puzzle 1 – Memory</button>
+
+    <!-- Button that will be revealed once the password is correct -->
+    <button id="secretStageBtn" class="hidden">Puzzle 3 – Secret Stage</button>
+
+    <!-- Password unlock area -->
+    <div id="unlockArea">
+      <input id="passwordInput" type="password" placeholder="Enter secret password" />
+      <button id="unlockBtn">Unlock 🔒</button>
+    </div>
   </section>
 
-<!-- ===== Puzzle 1 Container ===== -->
+  <!-- ===== Puzzle 1 Container ===== -->
   <section id="puzzle1" class="hidden">
     <h2>Puzzle 1 – Double Memory</h2>
 
@@ -105,10 +178,10 @@
   <script>
   (()=>{
     /* ===== Utility ===== */
-    const $ = sel => document.querySelector(sel);
+    const $  = sel => document.querySelector(sel);
     const $$ = sel => document.querySelectorAll(sel);
     const shuffle = arr => arr.sort(()=>Math.random()-0.5);
-    const delay = ms => new Promise(res=>setTimeout(res, ms));
+    const delay   = ms  => new Promise(res=>setTimeout(res, ms));
 
     /* ===== Emoji library for cards ===== */
     const EMOJI = [
@@ -116,25 +189,30 @@
     ];
 
     /* ===== Elements ===== */
-    const startBtn = $('#startPuzzle1');
-    const menu = $('#menu');
-    const puzzle1 = $('#puzzle1');
-    const stage1 = $('#stage1');
-    const stage2 = $('#stage2');
-    const stage3 = $('#stage3');
-    const grid1 = $('#grid1');
-    const grid2 = $('#grid2');
-    const grid3 = $('#grid3');
-    const time1Span = $('#time1');
-    const time2Span = $('#time2');
-    const msgOverlay = $('#messageOverlay');
-    const msgText = $('#messageText');
-    const msgBtn = $('#messageBtn');
-    const instr2 = $('#instructions2');
+    const startBtn     = $('#startPuzzle1');
+    const menu         = $('#menu');
+    const puzzle1      = $('#puzzle1');
+    const stage1       = $('#stage1');
+    const stage2       = $('#stage2');
+    const stage3       = $('#stage3');
+    const grid1        = $('#grid1');
+    const grid2        = $('#grid2');
+    const grid3        = $('#grid3');
+    const time1Span    = $('#time1');
+    const time2Span    = $('#time2');
+    const msgOverlay   = $('#messageOverlay');
+    const msgText      = $('#messageText');
+    const msgBtn       = $('#messageBtn');
+    const instr2       = $('#instructions2');
     const memoriseSecsSpan = $('#memoriseSecs');
-    const timerStage2El = $('#timerStage2');
-    const info3 = $('#info3');
-    const levelNum = $('#levelNum');
+    const timerStage2El    = $('#timerStage2');
+    const info3        = $('#info3');
+    const levelNum     = $('#levelNum');
+
+    /* ===== NEW: Unlock elements ===== */
+    const unlockBtn    = $('#unlockBtn');
+    const passwordInput= $('#passwordInput');
+    const secretBtn    = $('#secretStageBtn');
 
     /* ===== Config (CSS custom properties parsed as numbers) ===== */
     const cssNum = v=>+getComputedStyle(document.documentElement).getPropertyValue(v).trim();
@@ -150,6 +228,36 @@
       stage3Max: cssNum('--stage3-max-level')
     };
     memoriseSecsSpan.textContent = config.memoriseTime;
+
+    /* ===== Secret unlock logic ===== */
+    const SECRET_PWD = 'puzzlemaster'; // 🔑 change this to whatever you prefer
+
+    // If previously unlocked (persisted in localStorage), reveal immediately
+    if(localStorage.getItem('secretUnlocked')) {
+      revealSecretButton();
+    }
+
+    unlockBtn.addEventListener('click', () => {
+      if(passwordInput.value.trim() === SECRET_PWD) {
+        revealSecretButton();
+        localStorage.setItem('secretUnlocked','1');
+        showMsg('🔓 Secret stage unlocked! Click the new button to continue.','OK');
+      } else {
+        alert('Incorrect password!');
+        passwordInput.focus();
+      }
+    });
+
+    secretBtn.addEventListener('click', () => {
+      // Placeholder action – you can replace this with your future stage handler
+      showMsg('This secret stage is coming soon – stay tuned!');
+    });
+
+    function revealSecretButton(){
+      secretBtn.classList.remove('hidden');
+      unlockBtn.disabled = true;
+      passwordInput.disabled = true;
+    }
 
     /* ===== Game State ===== */
     let firstCard=null, lock=false, matched=0, timer1, timer2, timeLeft1, timeLeft2;
@@ -177,7 +285,8 @@
     /* ==========================================================
        Stage 1 – Pair matching
     ========================================================== */
-     function startStage1(){
+
+    function startStage1(){
       // reset state
       grid1.innerHTML='';
       firstCard=null; lock=false; matched=0;
@@ -238,7 +347,7 @@
 
     function winStage1(){
       clearInterval(timer1);
-      showMsg('Great memory! Stage 1 complete. Ready for Stage 2?','Next',startStage2);
+      showMsg('Great memory! Stage\u00A01 complete. Ready for Stage\u00A02?','Next',startStage2);
     }
 
     function fail(msg, retryFn){
@@ -296,7 +405,7 @@
       clearInterval(timer2);
       timer2=setInterval(()=>{
         timeLeft2--; time2Span.textContent=timeLeft2;
-        if(timeLeft2<=0){ clearInterval(timer2); fail('Out of time! Try again?', startStage2); }
+        if(timeLeft2<=0){ clearInterval(timer2); fail('Out\u00A0of\u00A0time! Try again?', startStage2); }
       },1000);
 
       // Prompt icon
@@ -321,13 +430,13 @@
         promptEl.innerHTML=`Find: <span style="font-size:2rem;">${sequence[clickIndex]}</span>`;
       }else{
         clearInterval(timer2);
-        fail('Wrong icon! Let’s try Stage 2 again?', startStage2);
+        fail('Wrong icon! Let’s try Stage\u00A02 again?', startStage2);
       }
     }
 
     function winStage2(){
       clearInterval(timer2);
-      showMsg('Stage 2 complete – impressive! Ready for Stage 3?','Next',startStage3);
+      showMsg('Stage\u00A02 complete – impressive! Ready for Stage\u00A03?','Next',startStage3);
     }
 
     /* ==========================================================
@@ -396,7 +505,7 @@
         }
       }else{
         acceptingInput=false;
-        fail('Oops, wrong order! Try Stage 3 again?', startStage3);
+        fail('Oops, wrong order! Try Stage\u00A03 again?', startStage3);
       }
     }
 
