@@ -12,7 +12,7 @@
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 66;
+    --stage2-time: 33;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -349,10 +349,17 @@ button:active {
   color: #000; /* optional: ensure emoji stays visible */
 
 }
-@keyframes pressScale {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.3); }
-  100% { transform: scale(1); }
+@media (hover: none), (pointer: coarse) {
+  .iconBtn.active {
+    transform: none;
+    box-shadow: none;
+    background: inherit;
+    border-color: transparent;
+    color: inherit;
+  }
+  .iconBtn.press-anim {
+    animation: pressScale 150ms ease;
+  }
 }
   .iconBtn.disabled {
     pointer-events: none;
@@ -1110,6 +1117,8 @@ function showMsg(text, btnText = 'OK', onClose = null) {
 
   function scrollToTop() {
   window.scrollTo(0, 0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
 }
 
   /* ===== Menu Buttons ===== */
@@ -1479,7 +1488,11 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-
+btn.addEventListener('touchstart', () => btn.classList.add('active'));
+btn.addEventListener('touchend', () => {
+  setTimeout(() => btn.classList.remove('active'), 300); // delay removal to let animation finish
+});
+btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
