@@ -125,7 +125,7 @@
   }
 
   /* Timer style */
-  #timerStage1, #timerStage2 {
+  #timerStage1 {
     font-weight: 700;
     font-size: 2rem;
     text-align: center;
@@ -169,6 +169,22 @@
   }
 
   /* Stage 2 styles */
+
+/* Reserve fixed height for timer area */
+#timerStage2 {
+  height: 2.5rem;       /* fix the height to reserve vertical space */
+  margin-bottom: 1rem;
+  font-weight: 700;
+  font-size: 2rem;
+  text-align: center;
+  color: #b3396a;
+  box-sizing: border-box;
+}
+
+/* Instead of display:none, hide timer visually but keep space */
+.timer-invisible {
+  visibility: hidden;
+}
   #instructions2 {
     font-weight: 600;
     font-size: 1.1rem;
@@ -205,8 +221,12 @@
 
 #grid3 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.6rem; /* match .grid */
+  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 600px; /* or keep your current max-width */
+  box-sizing: border-box;
+  padding: 0 0.5rem; /* optional horizontal padding */
 }
 
 #grid3.hidden {
@@ -447,13 +467,11 @@
 }
 
 .codeBox {
-  font-size: 2.4rem !important;      /* strong override */
+  font-size: 2.4rem !important;
   font-weight: 900;
   font-family: 'Courier New', monospace;
   text-align: center;
-  width: 100%;        /* let it fill grid column */
-  font-size: 2.4rem;  /* slightly smaller to fit on mobile */
-  padding: 0.4rem 0;
+  width: 100%;
   max-width: none;
   border: 1.5px solid #00ff00;
   border-radius: 8px;
@@ -461,15 +479,18 @@
   color: #00ff00;
   box-sizing: border-box;
 
-  height: 4.5rem;           /* explicit height */
-  line-height: 1;           /* avoid extra vertical space */
-  padding-top: 0.75rem;     /* more vertical padding */
-  padding-bottom: 0.75rem;
+  /* ✨ Remove vertical + horizontal padding */
+  padding: 0 !important;
+  height: 4.5rem;
+  line-height: 4.5rem; /* vertically center text */
+  overflow: hidden; /* prevent any accidental overflow */
 }
 @media (max-width: 400px) {
   .codeBox {
-    font-size: 1.8rem;
-    max-width: 100%;
+    font-size: 2.2rem !important;
+    height: 3.8rem !important;
+    line-height: 3.8rem !important;
+    padding: 0 !important;
   }
 }
 #codeWrap {
@@ -601,13 +622,13 @@ button#backToMenuBtn:hover {
   animation: duckReact 0.4s ease;
 }
 
-/* 👇 Responsive duck size for smaller screens */
 @media (max-width: 600px) {
   #duckOverlay {
-    width: 140px;
-    bottom: 6px;
-    right: 6px;
-    opacity: 0.2;
+    width: 280px;      /* was 140px */
+    max-width: 80vw;   /* safe fallback */
+    bottom: 12px;      /* small margin */
+    right: 12px;
+    opacity: 0.5;      /* more visible */
   }
 }
 
@@ -1230,7 +1251,7 @@ function updateDecrypt(){
 
   instructions2.textContent = `Memorera korten! Du har ${config.memoriseTime} sekunder på dig.`;
   questionPrompt.textContent = '';
-  timerStage2El.classList.add('hidden');
+timerStage2El.classList.add('timer-invisible');    // hide but keep space
 
   // Start memorization countdown
   let memTimeLeft = config.memoriseTime;
@@ -1260,7 +1281,7 @@ function beginQuestionPhase() {
     card.onclick = cardClickHandler;
   });
   instructions2.textContent = 'Vart var den här emojin? Klicka på rätt kort.';
-  timerStage2El.classList.remove('hidden');
+timerStage2El.classList.remove('timer-invisible'); // show timer
   timeLeft2 = config.stage2Time;
   time2Span.textContent = timeLeft2 + 's';
 
@@ -1429,10 +1450,10 @@ async function nextSimonSequence() {
   acceptingInput = false;
   buttons3.forEach(b => b.classList.add('disabled'));
   
-  // 🧼 Clear any lingering visual states
-  buttons3.forEach(b => {
-    b.classList.remove('active', 'press-anim');
-  });
+// Clear pressed and active states on all buttons
+buttons3.forEach(b => {
+  b.classList.remove('press-anim', 'active');
+});
 
   for (const icon of seq3) {
     const btn = buttons3.find(b => b.dataset.icon === icon);
