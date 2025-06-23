@@ -56,12 +56,7 @@
   button:hover {
     background: #ae3d8f;
   }
-  /* Disable hover background on touch devices / small screens */
-@media (hover: none), (pointer: coarse) {
-  button:hover {
-    background: inherit; /* or background: transparent; */
-  }
-}
+
 button:active {
   background-color: #ff49b8;  /* bright pink, visible */
   transform: scale(0.95);     /* slightly smaller for pressed effect */
@@ -1470,10 +1465,8 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-btn.addEventListener('touchend', () => btn.classList.remove('active'));
-btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
 btn.addEventListener('touchstart', () => {
-  btn.classList.add('active');
+  animatePress(btn); // single source of animation
 });
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
