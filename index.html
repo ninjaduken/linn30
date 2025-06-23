@@ -10,7 +10,7 @@
     --pairs: 2; /* 16 */
     --stage1-time: 60;
     --seq-count: 1; /* number of questions in puzzle 2 5*/
-	--stage2-cards: 8; /* number of questions in puzzle 2 */
+	--stage2-cards: 2; /* number of questions in puzzle 2 */
     --memorise-time: 5;
     --stage2-time: 60;
     --stage3-icons: 12;
@@ -202,7 +202,7 @@
 #grid3 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 0.6rem; /* match .grid */
 }
 
 #grid3.hidden {
@@ -235,25 +235,33 @@
 #startStage3Btn:hover {
   background: #ae3d8f;
 }
-  .iconBtn {
-    background: #ffadea;
-    font-size: 2.6rem;
-    padding: 1.1rem;
-    border-radius: 14px;
-    cursor: pointer;
-    user-select: none;
-    transition: background 0.15s, transform 0.15s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 3px 10px rgb(255 145 208 / 0.6);
-    border: 2px solid transparent;
-  }
+
+#puzzle3Container {
+  width: 100%;
+  max-width: 600px;
+}
+.iconBtn {
+  aspect-ratio: 1/1;
+  width: 100%;
+  font-size: 2.8rem;
+  background: #f9d7e5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s ease, background 0.3s ease;
+  box-shadow: 0 3px 8px rgb(209 131 184 / 0.5);
+  border: 2px solid transparent;
+}
   .iconBtn.active {
+    z-index: 10; /* 👈 ensures it's above neighbors */
     background: #ff49b8;
     transform: scale(1.3);
     box-shadow: 0 0 20px #ff00a0;
     border-color: #ff3388;
+	position: relative;
   }
   .iconBtn.disabled {
     pointer-events: none;
@@ -374,6 +382,7 @@
     color: #fff;
   }
  decryptUI {
+   position: relative; /* 👈 enables absolutely positioned children like duckOverlay */
   background-color: #2a2a2a; /* dark background for the section */
   color: #eee; /* light text color */
   padding: 1rem;
@@ -540,6 +549,29 @@ button#backToMenuBtn:hover {
   white-space: pre-line;
   text-align: center;
 }
+#duckOverlay {
+  position: absolute;
+  bottom: 80px;
+  right: 80px;
+  width: 800px; /* 👈 Larger size */
+  opacity: 0.5;  /* 👈 More visible, was 0.08 */
+  z-index: 2;    /* 👈 Bring above background but behind text */
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+@keyframes duckReact {
+  0% { transform: scale(1) rotate(0deg); }
+  20% { transform: scale(1.05) rotate(-2deg); }
+  50% { transform: scale(1.025) rotate(2deg); }
+  80% { transform: scale(1.05) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+#duckOverlay.reacting {
+  animation: duckReact 0.4s ease;
+}
 
 </style>
 </head>
@@ -590,8 +622,10 @@ button#backToMenuBtn:hover {
     <h3>Stage 3 – Följa John</h3>
     <p id="info3">Titta på ordningen</p>
 	<button id="startStage3Btn">Starta Stage 3</button>
+	<div id="puzzle3Container">
     <div id="grid3" class="grid"></div>
     <div id="levelInfo">Level: <span id="levelNum"></span></div>
+	</div>
   </article>
 </section>
 
@@ -618,6 +652,7 @@ button#backToMenuBtn:hover {
     <textarea id="secretInput" placeholder="Encrypted text..."></textarea>
     <pre id="secretOutput"></pre>
     <button id="backToMenuBtn">🔙 Tillbaka</button>
+	<img id="duckOverlay" src="darkweb-duck.png" alt="Duck" />
   </div>
 </section>
 
@@ -626,7 +661,6 @@ button#backToMenuBtn:hover {
   <div id="overlayText"></div>
   <button id="overlayBtn">OK</button>
 </div>
-
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -746,6 +780,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.remove('dark');  // <-- ADD THIS LINE
 
   showMenu();
+});
+
+const duck = $('#duckOverlay');
+const inputs = $$('#decryptUI input, #decryptUI textarea');
+
+inputs.forEach(input => {
+  input.addEventListener('input', () => {
+    if (!duck) return;
+    duck.classList.remove('reacting');
+    // Trigger reflow to restart animation
+    void duck.offsetWidth;
+    duck.classList.add('reacting');
+  });
 });
 
   // Emojis for puzzles
@@ -1158,7 +1205,7 @@ grid3.classList.remove('hidden');  // show by removing hidden class
   buttons3 = [];
   icons.forEach(icon => {
     const btn = document.createElement('button');
-    btn.className = 'iconBtn disabled'; 
+	btn.className = 'card iconBtn disabled';
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
@@ -1216,6 +1263,11 @@ async function nextSimonSequence() {
   info3.textContent = 'Titta på sekvensen…';
   acceptingInput = false;
   buttons3.forEach(b => b.classList.add('disabled'));
+  
+  // 🧼 Clear any lingering visual states
+  buttons3.forEach(b => {
+    b.classList.remove('active', 'press-anim');
+  });
 
   for (const icon of seq3) {
     const btn = buttons3.find(b => b.dataset.icon === icon);
