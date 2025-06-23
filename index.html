@@ -12,7 +12,7 @@
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 11;
+    --stage2-time: 15;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -1452,6 +1452,24 @@ grid3.classList.add('hidden');  // hide with class
   levelNum.textContent = level;
 }
 
+function startStage3() {
+  stage1.classList.add('hidden');
+  stage2.classList.add('hidden');
+  stage3.classList.remove('hidden');
+
+  startStage3Btn.style.display = 'inline-block';
+  grid3.classList.add('hidden');
+  info3.style.display = 'none';
+  document.getElementById('levelInfo').style.display = 'none';
+
+  seq3 = [];
+  level = 1;
+  playerIndex = 0;
+  acceptingInput = false;
+  buttons3 = [];
+  levelNum.textContent = level;
+}
+
 startStage3Btn.onclick = () => {
   startStage3Btn.style.display = 'none';
   grid3.classList.remove('hidden');
@@ -1460,8 +1478,8 @@ startStage3Btn.onclick = () => {
   levelNum.textContent = level;
 
   grid3.innerHTML = '';
-  const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
 
+  const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
   buttons3 = [];
 
   icons.forEach(icon => {
@@ -1469,11 +1487,20 @@ startStage3Btn.onclick = () => {
     btn.className = 'card iconBtn disabled';
     btn.textContent = icon;
     btn.dataset.icon = icon;
+    btn.disabled = false;
+    btn.style.touchAction = 'manipulation'; // mobile tap stability
 
-    // Main click handler
+    // Touch-friendly press animation
+    btn.addEventListener('touchstart', () => {
+      animatePress(btn);
+    }, { passive: true });
+
+    btn.addEventListener('touchend', () => {
+      btn.classList.remove('press-anim');
+    });
+
     btn.onclick = () => {
       if (!acceptingInput) return;
-
       playSound(523);
       animatePress(btn);
 
@@ -1483,7 +1510,7 @@ startStage3Btn.onclick = () => {
           level++;
           if (level > config.stage3Max) {
             showMsg(
-              `🎉 Grattis! Du har klarat alla steg! 🎉<br>Lösenordet är:<br><strong>${puzzleConfig.password}</strong>`,
+              `🎉 Grattis! Du har klarat alla steg! 🎉<br><strong>Lösenordet är: ${puzzleConfig.password}</strong>`,
               'Avsluta',
               showMenu
             );
@@ -1493,7 +1520,7 @@ startStage3Btn.onclick = () => {
           acceptingInput = false;
           buttons3.forEach(b => b.classList.add('disabled'));
           playerIndex = 0;
-          setTimeout(nextSimonSequence, 1000);
+          setTimeout(() => nextSimonSequence(), 1000);
         }
       } else {
         playSound(196);
@@ -1511,6 +1538,34 @@ startStage3Btn.onclick = () => {
     nextSimonSequence();
   }, 1500);
 };
+
+async function nextSimonSequence() {
+  const availableIcons = buttons3.map(b => b.dataset.icon);
+  const newIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
+  seq3.push(newIcon);
+
+  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
+  info3.textContent = 'Titta på sekvensen…';
+  acceptingInput = false;
+  buttons3.forEach(b => b.classList.add('disabled'));
+
+  for (const icon of seq3) {
+    const btn = buttons3.find(b => b.dataset.icon === icon);
+    btn.classList.remove('active', 'press-anim');
+    void btn.offsetWidth;
+    btn.classList.add('active');
+    playSound(523 + Math.random() * 200);
+    await delay(config.stage3Show);
+    btn.classList.remove('active');
+    await delay(250);
+  }
+
+  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
+  info3.textContent = 'Din tur! Repetera sekvensen';
+  acceptingInput = true;
+  buttons3.forEach(b => b.classList.remove('disabled'));
+  playerIndex = 0;
+}
 
 async function nextSimonSequence() {
 
@@ -1553,9 +1608,9 @@ for (const icon of seq3) {
 
 function animatePress(el) {
   el.classList.remove('press-anim');
-  void el.offsetWidth; // force reflow
+  void el.offsetWidth;
   el.classList.add('press-anim');
-  setTimeout(() => el.classList.remove('press-anim'), 250); // Adjust timing as needed
+  setTimeout(() => el.classList.remove('press-anim'), 300);
 }
 
   /* ===== Initialize ===== */
