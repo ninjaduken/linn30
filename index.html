@@ -358,7 +358,7 @@ button:active {
     color: inherit;
   }
   .iconBtn.press-anim {
-    animation: pressScale 150ms ease;
+    animation: pressScaleShrink 150ms ease;
   }
 }
   .iconBtn.disabled {
@@ -374,15 +374,28 @@ button:active {
   }
   /* Animations on press */
  .press-anim {
-  animation: pressScale 150ms ease;
+  animation: pressScaleShrink 150ms ease;
+}
+@keyframes pressScaleGrow {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
 
-@keyframes pressScale {
-   0% { transform: scale(1); }
-   50% { transform: scale(0.85); }
-   100% { transform: scale(1); }
+@keyframes pressScaleShrink {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.85); }
+  100% { transform: scale(1); }
+}
+/* Simon says flash + grow */
+.flash-grow {
+  animation: pressScaleGrow 150ms ease;
 }
 
+/* Press shrink effect */
+.press-shrink {
+  animation: pressScaleShrink 150ms ease;
+}
   /* Secret page dark web theme */
   body.dark {
     background: #000000;
@@ -1488,11 +1501,8 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-btn.addEventListener('touchstart', () => btn.classList.add('active'));
-btn.addEventListener('touchend', () => {
-  setTimeout(() => btn.classList.remove('active'), 300); // delay removal to let animation finish
-});
-btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
+btn.addEventListener('touchstart', () => animatePress(btn));
+btn.addEventListener('mousedown', () => animatePress(btn)); // optional desktop tap feedback
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
@@ -1562,10 +1572,10 @@ for (const icon of seq3) {
   // Force reflow (important for Safari to restart animation)
   void btn.offsetWidth;
 
-  btn.classList.add('active');
-  playSound(523 + Math.random() * 200);
+animateFlashGrow(btn);
+playSound(523 + Math.random() * 200);
+await delay(config.stage3Show);
   await delay(config.stage3Show);
-  btn.classList.remove('active');
   await delay(250);
 }
 
@@ -1581,16 +1591,31 @@ for (const icon of seq3) {
 function animatePress(el) {
   if (!el) return;
 
-  el.classList.remove('press-anim');
+  el.classList.remove('press-shrink');
 
-  // Schedule the add in the next frame to ensure clean animation
-  requestAnimationFrame(() => {
-    el.classList.add('press-anim');
+  // Trigger reflow to restart animation
+  void el.offsetWidth;
 
-    setTimeout(() => {
-      el.classList.remove('press-anim');
-    }, 150); // Match with CSS duration
-  });
+  el.classList.add('press-shrink');
+
+  el.addEventListener('animationend', () => {
+    el.classList.remove('press-shrink');
+  }, { once: true });
+}
+
+function animateFlashGrow(el) {
+  if (!el) return;
+
+  el.classList.remove('flash-grow');
+
+  // Trigger reflow to restart animation
+  void el.offsetWidth;
+
+  el.classList.add('flash-grow');
+
+  el.addEventListener('animationend', () => {
+    el.classList.remove('flash-grow');
+  }, { once: true });
 }
 
   /* ===== Initialize ===== */
