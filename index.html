@@ -366,14 +366,15 @@ button:active {
     color: #aa2e7a;
   }
   /* Animations on press */
-  .press-anim {
-  transform: scale(0.94);
-  }
-  @keyframes pressScale {
-    0% { transform: scale(1); }
-    50% { transform: scale(0.85); }
-    100% { transform: scale(1); }
-  }
+ .press-anim {
+  animation: pressScale 150ms ease;
+}
+
+@keyframes pressScale {
+   0% { transform: scale(1); }
+   50% { transform: scale(0.85); }
+   100% { transform: scale(1); }
+}
 
   /* Secret page dark web theme */
   body.dark {
