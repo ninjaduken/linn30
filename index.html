@@ -12,7 +12,7 @@
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 33;
+    --stage2-time: 44;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -321,12 +321,13 @@
   transform-style: preserve-3d;
 }
 .iconBtn.active {
-  
-  transform: scale(1.3);
+  background: #ff49b8 !important; /* or your preferred sequence flash color */
+  transform: scale(1.2);
   box-shadow: 0 0 20px #ff00a0;
   border-color: #ff3388;
   z-index: 20;
   transform-origin: center;
+  color: #000; /* optional: ensure emoji stays visible */
 
 }
 @keyframes pressScale {
@@ -765,7 +766,7 @@ button#backToMenuBtn:hover {
   <article id="stage2" class="stage hidden">
     <h3>Steg 2 – Vart är emojin?</h3>
     <div id="instructions2">Memorera alla kort</div>
-    <div id="timerStage2" class="timer hidden">⏳ <span id="time2"></span></div>
+    <div id="timerStage2" class="timer timer-invisible">⏳ <span id="time2"></span></div>
     <div id="grid2" class="grid"></div>
     <div id="questionPrompt" style="margin-top:1rem; font-weight:bold; text-align:center; font-size:1.2rem; color:#a92c82;"></div>
   </article>
