@@ -1625,6 +1625,26 @@ function animateFlashGrow(el) {
   }, { once: true });
 }
 
+function scrollToTopOnMobile() {
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+  if (!isMobile) return;
+
+  const tryScrollTop = () => {
+    window.scrollTo(0, 0);
+  };
+
+  window.addEventListener('load', () => {
+    tryScrollTop();
+    setTimeout(tryScrollTop, 100);
+    setTimeout(tryScrollTop, 300);
+  });
+
+  window.addEventListener('orientationchange', () => {
+    setTimeout(tryScrollTop, 300);
+  });
+}
+
+scrollToTopOnMobile();
   /* ===== Initialize ===== */
   window.addEventListener('load', () => {
   setTimeout(() => window.scrollTo(0, 0), 100);
