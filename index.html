@@ -1486,15 +1486,22 @@ async function nextSimonSequence() {
   acceptingInput = false;
   buttons3.forEach(b => b.classList.add('disabled'));
   
-  // show the sequence
-  for (const icon of seq3) {
-    const btn = buttons3.find(b => b.dataset.icon === icon);
-    btn.classList.add('active');
-    playSound(523 + Math.random() * 200);
-    await delay(config.stage3Show);
-    btn.classList.remove('active');
-    await delay(250);
-  }
+// show the sequence
+for (const icon of seq3) {
+  const btn = buttons3.find(b => b.dataset.icon === icon);
+
+  // Force clear in case it's still stuck
+  btn.classList.remove('active', 'press-anim');
+
+  // Force reflow (important for Safari to restart animation)
+  void btn.offsetWidth;
+
+  btn.classList.add('active');
+  playSound(523 + Math.random() * 200);
+  await delay(config.stage3Show);
+  btn.classList.remove('active');
+  await delay(250);
+}
 
   /* --- EXTRA one-shot clean-up --- */
   buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
