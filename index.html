@@ -1486,6 +1486,9 @@ async function nextSimonSequence() {
   acceptingInput = false;
   buttons3.forEach(b => b.classList.add('disabled'));
   
+  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
+
+  
 // show the sequence
 for (const icon of seq3) {
   const btn = buttons3.find(b => b.dataset.icon === icon);
@@ -1513,8 +1516,13 @@ for (const icon of seq3) {
 }
 
 function animatePress(el) {
+  el.classList.remove('active');
+  void el.offsetWidth; // trigger reflow
   el.classList.add('active');
-  setTimeout(() => el.classList.remove('active'), 400);
+
+  setTimeout(() => {
+    el.classList.remove('active');
+  }, 200); // fallback in case animationend fails
 }
 
   /* ===== Initialize ===== */
