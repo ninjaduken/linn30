@@ -28,12 +28,17 @@
 	}
   body {
   overflow-x: hidden;
-    margin: 0; padding: 2rem; min-height: 100vh;
+    margin: 0; padding: 1rem; min-height: 100vh;
     background: #ffe6f0;
     color: #4a154b;
     display: flex; flex-direction: column; align-items: center;
     transition: background 0.3s ease;
   }
+  @media (max-width: 480px) {
+  body {
+    padding: 0.5rem;
+  }
+}
   h1, h2, h3 {
     margin-top: 0; text-align: center;
   }
@@ -231,7 +236,6 @@
 
 #grid3 {
   display: grid;
-  grid-template-columns: repeat(4, 1fr); /* ← always 4 cards per row */
   gap: 0.6rem;
   width: 100%;
   max-width: 100%;
@@ -294,7 +298,7 @@
   overflow: visible;
   position: relative;
   z-index: 1;          /* normal cards */
-  margin: .15rem;      /* tiny gutter so 1.3× never clips */
+  margin: 0rem;      /* tiny gutter so 1.3× never clips */
 }
 .iconBtn.active {
   background: #ff49b8;
@@ -303,6 +307,13 @@
   border-color: #ff3388;
   z-index: 20;         /* above neighbours while flashing */
   transform-origin: center;
+  animation: pressScale 0.4s ease forwards;
+
+}
+@keyframes pressScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
 }
   .iconBtn.disabled {
     pointer-events: none;
@@ -725,7 +736,7 @@ button#backToMenuBtn:hover {
 
   <!-- Stage 1: Pair matching -->
   <article id="stage1" class="stage">
-    <h3>Stage 1 – Hitta alla par</h3>
+    <h3>Steg 1 – Hitta alla par</h3>
     <div id="timerStage1">⏳ <span id="time1"></span></div>
     <div id="grid1" class="grid"></div>
   </article>
@@ -733,8 +744,8 @@ button#backToMenuBtn:hover {
 
   <!-- Stage 2: Locate emoji questions -->
   <article id="stage2" class="stage hidden">
-    <h3>Stage 2 – Vart är emojin?</h3>
-    <div id="instructions2">Memorera alla kort, och svara på frågorna</div>
+    <h3>Steg 2 – Vart är emojin?</h3>
+    <div id="instructions2">Memorera alla kort</div>
     <div id="timerStage2" class="timer hidden">⏳ <span id="time2"></span></div>
     <div id="grid2" class="grid"></div>
     <div id="questionPrompt" style="margin-top:1rem; font-weight:bold; text-align:center; font-size:1.2rem; color:#a92c82;"></div>
@@ -742,9 +753,9 @@ button#backToMenuBtn:hover {
 
   <!-- Stage 3: Simon style -->
   <article id="stage3" class="stage hidden">
-    <h3>Stage 3 – Följa John</h3>
+    <h3>Steg 3 – Följa John</h3>
     <p id="info3">Titta på ordningen</p>
-	<button id="startStage3Btn">Starta Stage 3</button>
+	<button id="startStage3Btn">Starta Steg 3</button>
 	<div id="puzzle3Container">
     <div id="grid3" class="grid"></div>
     <div id="levelInfo">Level: <span id="levelNum"></span></div>
@@ -756,7 +767,7 @@ button#backToMenuBtn:hover {
 <section id="secretPage" class="hidden">
   <!-- Serial Prompt Section -->
   <div id="serialPrompt">
-    <h2>🔐 Skriv in Serial Number</h2>
+    <h2>🔐 Serial Number</h2>
     <input id="serialInput" maxlength="10" autocomplete="off" />
     <button id="serialSubmitBtn">Skicka</button>
     <button id="serialBackBtn">Tillbaka</button>
@@ -1488,8 +1499,12 @@ async function nextSimonSequence() {
 }
 
 function animatePress(el) {
-  el.classList.add('press-anim');
-  setTimeout(() => el.classList.remove('press-anim'), 150);
+  el.classList.add('active');
+
+  // Remove .active after animation ends
+  el.addEventListener('animationend', () => {
+    el.classList.remove('active');
+  }, { once: true });
 }
 
   /* ===== Initialize ===== */
