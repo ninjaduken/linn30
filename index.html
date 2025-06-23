@@ -340,7 +340,7 @@ button:active {
   transform-style: preserve-3d;
 }
 .iconBtn.active {
-  background: #ff49b8 !important; /* or your preferred sequence flash color */
+  background: #ff49b8; /* or your preferred sequence flash color */
   transform: scale(1.2);
   box-shadow: 0 0 20px #ff00a0;
   border-color: #ff3388;
@@ -365,9 +365,13 @@ button:active {
     text-align: center;
     color: #aa2e7a;
   }
-
+.iconBtn.press-anim {
+  transform: scale(0.95);
+  transition: transform 0.1s ease, background 0.2s ease;
+}
   /* Animations on press */
   .press-anim {
+  will-change: transform;
   transition: transform 0.1s ease, background-color 0.15s ease;
   }
   @keyframes pressScale {
@@ -1449,57 +1453,47 @@ grid3.classList.add('hidden');  // hide with class
 }
 
 startStage3Btn.onclick = () => {
-  startStage3Btn.style.display = 'none';   // Hide start button
-grid3.classList.remove('hidden');  // show by removing hidden class
-  info3.style.display = 'block';            // Show info
-  document.getElementById('levelInfo').style.display = 'block'; // Show level info
-
+  startStage3Btn.style.display = 'none';
+  grid3.classList.remove('hidden');
+  info3.style.display = 'block';
+  document.getElementById('levelInfo').style.display = 'block';
   levelNum.textContent = level;
-  grid3.innerHTML = '';
-// grid3.style.gridTemplateColumns = `repeat(4, 1fr)`;
 
+  grid3.innerHTML = '';
   const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
 
   buttons3 = [];
+
   icons.forEach(icon => {
     const btn = document.createElement('button');
-	btn.className = 'card iconBtn disabled';
+    btn.className = 'card iconBtn disabled';
     btn.textContent = icon;
     btn.dataset.icon = icon;
-    btn.disabled = false;
-btn.addEventListener('touchend', () => btn.classList.remove('active'));
-btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
-btn.addEventListener('touchstart', () => {
-  btn.classList.add('active');
-});
-	  startStage3Btn.style.display = 'none'; // Hide start button
-  info3.style.display = 'block';
-  grid3.style.display = 'grid';
-  levelNum.style.display = 'inline'; // or whatever shows level info
 
+    // Main click handler
     btn.onclick = () => {
       if (!acceptingInput) return;
+
       playSound(523);
       animatePress(btn);
+
       if (icon === seq3[playerIndex]) {
         playerIndex++;
         if (playerIndex === seq3.length) {
           level++;
           if (level > config.stage3Max) {
-		showMsg(
-				`🎉 Grattis! Du har klarat alla steg! 🎉\nLösenordet är:\n<strong>${puzzleConfig.password}</strong>`, 
-				'Avsluta', 
-				showMenu
-				);
+            showMsg(
+              `🎉 Grattis! Du har klarat alla steg! 🎉<br>Lösenordet är:<br><strong>${puzzleConfig.password}</strong>`,
+              'Avsluta',
+              showMenu
+            );
             return;
           }
           levelNum.textContent = level;
           acceptingInput = false;
           buttons3.forEach(b => b.classList.add('disabled'));
           playerIndex = 0;
-          setTimeout(() => {
-            nextSimonSequence();
-          }, 1000);
+          setTimeout(nextSimonSequence, 1000);
         }
       } else {
         playSound(196);
@@ -1510,12 +1504,12 @@ btn.addEventListener('touchstart', () => {
     buttons3.push(btn);
     grid3.appendChild(btn);
   });
- // Show “Get ready...” message
+
   info3.textContent = 'Gör dig redo...';
   setTimeout(() => {
     info3.textContent = 'Titta på sekvensen…';
     nextSimonSequence();
-  }, 1500); // 1.5 seconds delay before sequence starts
+  }, 1500);
 };
 
 async function nextSimonSequence() {
@@ -1549,7 +1543,7 @@ for (const icon of seq3) {
 }
 
   /* --- EXTRA one-shot clean-up --- */
-  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
+  // buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   info3.textContent = 'Din tur! Repetera sekvensen';
   acceptingInput = true;
@@ -1559,9 +1553,9 @@ for (const icon of seq3) {
 
 function animatePress(el) {
   el.classList.remove('press-anim');
-  void el.offsetWidth;
+  void el.offsetWidth; // force reflow
   el.classList.add('press-anim');
-  setTimeout(() => el.classList.remove('press-anim'), 100);
+  setTimeout(() => el.classList.remove('press-anim'), 250); // Adjust timing as needed
 }
 
   /* ===== Initialize ===== */
