@@ -340,7 +340,7 @@ button:active {
   transform-style: preserve-3d;
 }
 .iconBtn.active {
-  background: #ff49b8; /* or your preferred sequence flash color */
+  background: #ff49b8 !important; /* or your preferred sequence flash color */
   transform: scale(1.2);
   box-shadow: 0 0 20px #ff00a0;
   border-color: #ff3388;
@@ -1096,10 +1096,14 @@ function showMsg(text, btnText = 'OK', onClose = null) {
     document.body.classList.remove('dark');
   }
   function showMenu() {
-    scrollToTop(); 
     hideAll();
     menu.classList.remove('hidden');
+	setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+
   }
+  function scrollToTop() {
+  window.scrollTo(0, 0);
+}
 
   /* ===== Menu Buttons ===== */
   startPuzzle1Btn.onclick = () => {
