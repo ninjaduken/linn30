@@ -10,8 +10,8 @@
     --pairs: 1; /* 16 */
     --stage1-time: 60;
     --seq-count: 1; /* number of questions in puzzle 2 5*/
-	--stage2-cards: 2; /* number of questions in puzzle 2 */
-    --memorise-time: 5;
+	--stage2-cards: 1; /* number of questions in puzzle 2 */
+    --memorise-time: 1;
     --stage2-time: 60;
     --stage3-icons: 12;
     --stage3-start-len: 3;
@@ -303,7 +303,7 @@
   aspect-ratio: 1 / 1;
   width: 100%;
   font-size: clamp(2rem, 6vw, 2.8rem);
-  background: #ff49b8;
+  background: #f9d7e5;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -312,7 +312,6 @@
   box-shadow: 0 3px 8px rgb(209 131 184 / .5);
   border: 2px solid transparent;
   transition: transform .15s ease, background .3s ease;
-  /* NEW ↓ — always start at scale(1) and allow the overflow to show */
   transform: scale(1);
   overflow: visible;
   position: relative;
