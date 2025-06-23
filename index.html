@@ -389,8 +389,12 @@ button:active {
 }
 /* Simon says flash + grow */
 .flash-grow {
-  animation: pressScaleGrow 150ms ease;
-}
+animation: pressScaleGrow 150ms ease forwards;
+  background-color: #ff49b8; /* bright pink highlight */
+  border-color: #ff3388;
+  box-shadow: 0 0 20px #ff00a0;
+  color: #000; /* keep emoji visible */
+  }
 
 /* Press shrink effect */
 .press-shrink {
@@ -1575,8 +1579,7 @@ for (const icon of seq3) {
 animateFlashGrow(btn);
 playSound(523 + Math.random() * 200);
 await delay(config.stage3Show);
-  await delay(config.stage3Show);
-  await delay(250);
+await delay(250);
 }
 
   /* --- EXTRA one-shot clean-up --- */
