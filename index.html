@@ -12,7 +12,7 @@
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 15;
+    --stage2-time: 22;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -1452,75 +1452,58 @@ grid3.classList.add('hidden');  // hide with class
   levelNum.textContent = level;
 }
 
-function startStage3() {
-  stage1.classList.add('hidden');
-  stage2.classList.add('hidden');
-  stage3.classList.remove('hidden');
-
-  startStage3Btn.style.display = 'inline-block';
-  grid3.classList.add('hidden');
-  info3.style.display = 'none';
-  document.getElementById('levelInfo').style.display = 'none';
-
-  seq3 = [];
-  level = 1;
-  playerIndex = 0;
-  acceptingInput = false;
-  buttons3 = [];
-  levelNum.textContent = level;
-}
-
 startStage3Btn.onclick = () => {
-  startStage3Btn.style.display = 'none';
-  grid3.classList.remove('hidden');
-  info3.style.display = 'block';
-  document.getElementById('levelInfo').style.display = 'block';
-  levelNum.textContent = level;
+  startStage3Btn.style.display = 'none';   // Hide start button
+grid3.classList.remove('hidden');  // show by removing hidden class
+  info3.style.display = 'block';            // Show info
+  document.getElementById('levelInfo').style.display = 'block'; // Show level info
 
+  levelNum.textContent = level;
   grid3.innerHTML = '';
+// grid3.style.gridTemplateColumns = `repeat(4, 1fr)`;
 
   const icons = shuffle(EMOJI).slice(0, config.stage3Icons);
-  buttons3 = [];
 
+  buttons3 = [];
   icons.forEach(icon => {
     const btn = document.createElement('button');
-    btn.className = 'card iconBtn disabled';
+	btn.className = 'card iconBtn disabled';
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-    btn.style.touchAction = 'manipulation'; // mobile tap stability
-
-    // Touch-friendly press animation
-    btn.addEventListener('touchstart', () => {
-      animatePress(btn);
-    }, { passive: true });
-
-    btn.addEventListener('touchend', () => {
-      btn.classList.remove('press-anim');
-    });
+btn.addEventListener('touchend', () => btn.classList.remove('active'));
+btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
+btn.addEventListener('touchstart', () => {
+  btn.classList.add('active');
+});
+	  startStage3Btn.style.display = 'none'; // Hide start button
+  info3.style.display = 'block';
+  grid3.style.display = 'grid';
+  levelNum.style.display = 'inline'; // or whatever shows level info
 
     btn.onclick = () => {
       if (!acceptingInput) return;
       playSound(523);
       animatePress(btn);
-
       if (icon === seq3[playerIndex]) {
         playerIndex++;
         if (playerIndex === seq3.length) {
           level++;
           if (level > config.stage3Max) {
-            showMsg(
-              `🎉 Grattis! Du har klarat alla steg! 🎉<br><strong>Lösenordet är: ${puzzleConfig.password}</strong>`,
-              'Avsluta',
-              showMenu
-            );
+		showMsg(
+				`🎉 Grattis! Du har klarat alla steg! 🎉\nLösenordet är:\n<strong>${puzzleConfig.password}</strong>`, 
+				'Avsluta', 
+				showMenu
+				);
             return;
           }
           levelNum.textContent = level;
           acceptingInput = false;
           buttons3.forEach(b => b.classList.add('disabled'));
           playerIndex = 0;
-          setTimeout(() => nextSimonSequence(), 1000);
+          setTimeout(() => {
+            nextSimonSequence();
+          }, 1000);
         }
       } else {
         playSound(196);
@@ -1531,41 +1514,13 @@ startStage3Btn.onclick = () => {
     buttons3.push(btn);
     grid3.appendChild(btn);
   });
-
+ // Show “Get ready...” message
   info3.textContent = 'Gör dig redo...';
   setTimeout(() => {
     info3.textContent = 'Titta på sekvensen…';
     nextSimonSequence();
-  }, 1500);
+  }, 1500); // 1.5 seconds delay before sequence starts
 };
-
-async function nextSimonSequence() {
-  const availableIcons = buttons3.map(b => b.dataset.icon);
-  const newIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
-  seq3.push(newIcon);
-
-  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
-  info3.textContent = 'Titta på sekvensen…';
-  acceptingInput = false;
-  buttons3.forEach(b => b.classList.add('disabled'));
-
-  for (const icon of seq3) {
-    const btn = buttons3.find(b => b.dataset.icon === icon);
-    btn.classList.remove('active', 'press-anim');
-    void btn.offsetWidth;
-    btn.classList.add('active');
-    playSound(523 + Math.random() * 200);
-    await delay(config.stage3Show);
-    btn.classList.remove('active');
-    await delay(250);
-  }
-
-  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
-  info3.textContent = 'Din tur! Repetera sekvensen';
-  acceptingInput = true;
-  buttons3.forEach(b => b.classList.remove('disabled'));
-  playerIndex = 0;
-}
 
 async function nextSimonSequence() {
 
@@ -1608,9 +1563,9 @@ for (const icon of seq3) {
 
 function animatePress(el) {
   el.classList.remove('press-anim');
-  void el.offsetWidth;
+  void el.offsetWidth;  // trigger reflow
   el.classList.add('press-anim');
-  setTimeout(() => el.classList.remove('press-anim'), 300);
+  setTimeout(() => el.classList.remove('press-anim'), 400);  // increased from 200ms to 400ms
 }
 
   /* ===== Initialize ===== */
