@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>🎁Linn 30🎁</title>
 <style>
-  /* === Root & general styles === */
+  /* === Root & general  styles === */
   :root {
     --pairs: 2; /* 16 */
     --stage1-time: 60;
@@ -52,6 +52,13 @@
     color: #fff;
     transition: background 0.2s, transform 0.1s ease;
     user-select: none;
+  }
+@media (hover: hover) {
+  .iconBtn:hover {
+    background: #ff49b8;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px #ff00a0;
+    border-color: #ff3388;
   }
   button:hover {
     background: #ae3d8f;
@@ -1479,37 +1486,26 @@ grid3.classList.remove('hidden');  // show by removing hidden class
 };
 
 async function nextSimonSequence() {
-
   const availableIcons = buttons3.map(b => b.dataset.icon);
   const newIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
   seq3.push(newIcon);
-	buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   info3.textContent = 'Titta på sekvensen…';
   acceptingInput = false;
-  buttons3.forEach(b => b.classList.add('disabled'));
-  
+  buttons3.forEach(b => {
+    b.classList.remove('active'); // clear any lingering active state
+    b.classList.add('disabled');
+  });
 
-  
-// show the sequence
-for (const icon of seq3) {
-  const btn = buttons3.find(b => b.dataset.icon === icon);
-
-  // Force clear in case it's still stuck
-  btn.classList.remove('active', 'press-anim');
-
-  // Force reflow (important for Safari to restart animation)
-  void btn.offsetWidth;
-
-  btn.classList.add('active');
-  playSound(523 + Math.random() * 200);
-  await delay(config.stage3Show);
-  btn.classList.remove('active');
-  await delay(250);
-}
-
-  /* --- EXTRA one-shot clean-up --- */
-  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
+  // show the sequence
+  for (const icon of seq3) {
+    const btn = buttons3.find(b => b.dataset.icon === icon);
+    btn.classList.add('active');
+    playSound(523 + Math.random() * 200);
+    await delay(config.stage3Show);
+    btn.classList.remove('active');
+    await delay(250);
+  }
 
   info3.textContent = 'Din tur! Repetera sekvensen';
   acceptingInput = true;
@@ -1518,14 +1514,8 @@ for (const icon of seq3) {
 }
 
 function animatePress(el) {
-  el.classList.remove('active');
-  void el.offsetWidth; // force reflow to restart animation
   el.classList.add('active');
-
-  // Always clean up after 300ms (animation fallback for iOS)
-  setTimeout(() => {
-    el.classList.remove('active');
-  }, 300);
+  setTimeout(() => el.classList.remove('active'), 300);
 }
 
   /* ===== Initialize ===== */
