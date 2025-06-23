@@ -447,12 +447,13 @@
 }
 
 .codeBox {
-  font-size: 3rem !important;      /* strong override */
+  font-size: 2.4rem !important;      /* strong override */
   font-weight: 900;
   font-family: 'Courier New', monospace;
   text-align: center;
-  padding: 0.5rem 0;
-  width: 100%;
+  width: 100%;        /* let it fill grid column */
+  font-size: 2.4rem;  /* slightly smaller to fit on mobile */
+  padding: 0.4rem 0;
   max-width: none;
   border: 1.5px solid #00ff00;
   border-radius: 8px;
@@ -473,7 +474,7 @@
 }
 #codeWrap {
   display: grid;
-  grid-template-columns: repeat(5, minmax(5rem, 1fr)); /* min width for better input size */
+  grid-template-columns: repeat(5, minmax(0, 1fr)); /* this allows shrinking */
   gap: 0.5rem;
   margin-bottom: 1rem;
   width: 100%;
