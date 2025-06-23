@@ -360,13 +360,9 @@ button:active {
     text-align: center;
     color: #aa2e7a;
   }
-.iconBtn.press-anim {
-  transform: scale(0.95);
-  transition: transform 0.1s ease, background 0.2s ease;
-}
   /* Animations on press */
   .press-anim {
-  transition: transform 0.1s ease, background-color 0.15s ease;
+  transform: scale(0.94);
   }
   @keyframes pressScale {
     0% { transform: scale(1); }
@@ -1555,15 +1551,16 @@ for (const icon of seq3) {
 
 function animatePress(el) {
   if (!el) return;
+
   el.classList.remove('press-anim');
 
-  // Allow the browser a layout tick before applying
+  // Schedule the add in the next frame to ensure clean animation
   requestAnimationFrame(() => {
     el.classList.add('press-anim');
 
     setTimeout(() => {
       el.classList.remove('press-anim');
-    }, 100); // Match your CSS transition duration
+    }, 100); // Match with CSS duration
   });
 }
 
