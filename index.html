@@ -300,6 +300,10 @@
   position: relative;
   z-index: 1;          /* normal cards */
   margin: 0rem;      /* tiny gutter so 1.3× never clips */
+  -webkit-tap-highlight-color: transparent; /* remove grey highlight on tap */
+  -webkit-user-select: none; /* disable text selection */
+  user-select: none;
+  -webkit-touch-callout: none; /* disable callout menu on long press */
 }
 .iconBtn.active {
   background: #ff49b8;
@@ -1425,6 +1429,8 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
+	btn.addEventListener('touchend', () => btn.classList.remove('active'));
+	btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
@@ -1501,11 +1507,7 @@ async function nextSimonSequence() {
 
 function animatePress(el) {
   el.classList.add('active');
-
-  // Remove .active after animation ends
-  el.addEventListener('animationend', () => {
-    el.classList.remove('active');
-  }, { once: true });
+  setTimeout(() => el.classList.remove('active'), 400);
 }
 
   /* ===== Initialize ===== */
