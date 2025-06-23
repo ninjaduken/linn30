@@ -288,7 +288,16 @@
     box-shadow: 0 0 10px #ff00a0;
     border-color: #ff3388;
   }
- }
+}
+
+@media (hover: none) {
+  .iconBtn:hover {
+    background: inherit;
+    transform: none;
+    box-shadow: none;
+    border-color: transparent;
+  }
+}
   
 .iconBtn {
   aspect-ratio: 1 / 1;
