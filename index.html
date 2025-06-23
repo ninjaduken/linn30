@@ -327,6 +327,8 @@
   border-color: #ff3388;
   z-index: 20;
   transform-origin: center;
+   border: 3px solid black !important;
+
 }
 @keyframes pressScale {
   0% { transform: scale(1); }
@@ -1442,8 +1444,8 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-	btn.addEventListener('touchend', () => btn.classList.remove('active'));
-	btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
+//	btn.addEventListener('touchend', () => btn.classList.remove('active'));
+//	btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
