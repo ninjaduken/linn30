@@ -7,7 +7,7 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 2; /* 16 */
+    --pairs: 3; /* 16 */
     --stage1-time: 60;
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 2; /* number of questions in puzzle 2 */
@@ -219,14 +219,23 @@
   gap: 1rem; /* optional for spacing between children */
 }
 
+#puzzle3Container {
+  width: 100%;
+  max-width: 600px;
+  overflow-x: auto; /* allow horizontal scroll on narrow screens */
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+  padding-bottom: 0.5rem; /* optional padding for scrollbar space */
+}
+
 #grid3 {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(70px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 0.6rem;
+  min-width: 280px; /* 4 cards * 70px minimum width */
   width: 100%;
-  max-width: 600px; /* or keep your current max-width */
   box-sizing: border-box;
-  padding: 0 0.5rem; /* optional horizontal padding */
+  overflow: visible; /* allow child elements to overflow */
+
 }
 
 #grid3.hidden {
@@ -278,6 +287,9 @@
   transition: transform 0.15s ease, background 0.3s ease;
   box-shadow: 0 3px 8px rgb(209 131 184 / 0.5);
   border: 2px solid transparent;
+  overflow: visible; /* make sure cards allow their scaling */
+  position: relative; /* keep stacking context for z-index */
+  z-index: 1;
 }
   .iconBtn.active {
     z-index: 10; /* 👈 ensures it's above neighbors */
