@@ -12,7 +12,7 @@
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 66;
+    --stage2-time: 33;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -321,8 +321,8 @@
   transform-style: preserve-3d;
 }
 .iconBtn.active {
-  background: #ff49b8;
   
+  transform: scale(1.3);
   box-shadow: 0 0 20px #ff00a0;
   border-color: #ff3388;
   z-index: 20;
@@ -1534,15 +1534,10 @@ for (const icon of seq3) {
 }
 
 function animatePress(el) {
-  el.classList.remove('active');
+  el.classList.remove('press-anim');
   void el.offsetWidth;
-  el.classList.add('active');
-
-  requestAnimationFrame(() => {
-    setTimeout(() => {
-      el.classList.remove('active');
-    }, 300);
-  });
+  el.classList.add('press-anim');
+  setTimeout(() => el.classList.remove('press-anim'), 200);
 }
 
   /* ===== Initialize ===== */
