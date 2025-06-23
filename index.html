@@ -62,9 +62,13 @@
     background: inherit; /* or background: transparent; */
   }
 }
-  button:active {
-    transform: scale(0.95);
-  }
+button:active {
+  background-color: #ff49b8;  /* bright pink, visible */
+  transform: scale(0.95);     /* slightly smaller for pressed effect */
+  transition: background 0.2s, transform 0.1s ease;
+  color: #fff;                /* keep text white */
+  outline: none;
+}
   input, textarea {
     font-family: inherit;
     font-size: 1rem;
@@ -99,6 +103,11 @@
     gap: 0.6rem;
     margin-top: 1rem;
   }
+  .grid.disabled .card {
+  pointer-events: none;
+  cursor: default;
+  opacity: 1; /* keep visible but not interactive */
+}
   /* Cards */
   .card {
     position: relative;
@@ -359,7 +368,7 @@
 
   /* Animations on press */
   .press-anim {
-    animation: pressScale 0.15s ease forwards;
+  transition: transform 0.1s ease, background-color 0.15s ease;
   }
   @keyframes pressScale {
     0% { transform: scale(1); }
@@ -1307,7 +1316,9 @@ function updateDecrypt(){
     card.onclick = null; // remove any old handlers
     grid2.appendChild(card);
   });
-
+// Disable clicks & pointer events during memorization phase
+lock = true;
+grid2.classList.add('disabled');
   instructions2.textContent = `Memorera korten! Du har ${config.memoriseTime} sekunder på dig.`;
   questionPrompt.textContent = '';
 timerStage2El.classList.add('timer-invisible');    // hide but keep space
@@ -1332,6 +1343,8 @@ function failStage2() {
 }
 
 function beginQuestionPhase() {
+ lock = false;
+  grid2.classList.remove('disabled');
   grid2.querySelectorAll('.card').forEach(card => {
     card.textContent = '';
     card.classList.remove('done');
@@ -1548,7 +1561,7 @@ function animatePress(el) {
   el.classList.remove('press-anim');
   void el.offsetWidth;
   el.classList.add('press-anim');
-  setTimeout(() => el.classList.remove('press-anim'), 200);
+  setTimeout(() => el.classList.remove('press-anim'), 100);
 }
 
   /* ===== Initialize ===== */
