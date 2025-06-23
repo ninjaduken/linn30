@@ -7,7 +7,7 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 2; /* 16 */
+    --pairs: 3; /* 16 */
     --stage1-time: 60;
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 2; /* number of questions in puzzle 2 */
@@ -52,13 +52,6 @@
     color: #fff;
     transition: background 0.2s, transform 0.1s ease;
     user-select: none;
-  }
-  @media (hover: hover) {
-  .iconBtn:hover {
-    background: #ff49b8;
-    transform: scale(1.05);
-    box-shadow: 0 0 10px #ff00a0;
-    border-color: #ff3388;
   }
   button:hover {
     background: #ae3d8f;
@@ -307,11 +300,7 @@
   position: relative;
   z-index: 1;          /* normal cards */
   margin: 0rem;      /* tiny gutter so 1.3× never clips */
-  -webkit-tap-highlight-color: transparent; /* remove grey highlight on tap */
-  -webkit-user-select: none; /* disable text selection */
   user-select: none;
-  -webkit-touch-callout: none; /* disable callout menu on long press */
-  -webkit-tap-highlight-color: transparent;
 }
 .iconBtn.active {
   background: #ff49b8;
@@ -1486,26 +1475,37 @@ grid3.classList.remove('hidden');  // show by removing hidden class
 };
 
 async function nextSimonSequence() {
+
   const availableIcons = buttons3.map(b => b.dataset.icon);
   const newIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
   seq3.push(newIcon);
+	buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   info3.textContent = 'Titta på sekvensen…';
   acceptingInput = false;
-  buttons3.forEach(b => {
-    b.classList.remove('active'); // clear any lingering active state
-    b.classList.add('disabled');
-  });
+  buttons3.forEach(b => b.classList.add('disabled'));
+  
 
-  // show the sequence
-  for (const icon of seq3) {
-    const btn = buttons3.find(b => b.dataset.icon === icon);
-    btn.classList.add('active');
-    playSound(523 + Math.random() * 200);
-    await delay(config.stage3Show);
-    btn.classList.remove('active');
-    await delay(250);
-  }
+  
+// show the sequence
+for (const icon of seq3) {
+  const btn = buttons3.find(b => b.dataset.icon === icon);
+
+  // Force clear in case it's still stuck
+  btn.classList.remove('active', 'press-anim');
+
+  // Force reflow (important for Safari to restart animation)
+  void btn.offsetWidth;
+
+  btn.classList.add('active');
+  playSound(523 + Math.random() * 200);
+  await delay(config.stage3Show);
+  btn.classList.remove('active');
+  await delay(250);
+}
+
+  /* --- EXTRA one-shot clean-up --- */
+  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   info3.textContent = 'Din tur! Repetera sekvensen';
   acceptingInput = true;
@@ -1514,8 +1514,14 @@ async function nextSimonSequence() {
 }
 
 function animatePress(el) {
+  el.classList.remove('active');
+  void el.offsetWidth; // force reflow to restart animation
   el.classList.add('active');
-  setTimeout(() => el.classList.remove('active'), 300);
+
+  // Always clean up after 300ms (animation fallback for iOS)
+  setTimeout(() => {
+    el.classList.remove('active');
+  }, 300);
 }
 
   /* ===== Initialize ===== */
