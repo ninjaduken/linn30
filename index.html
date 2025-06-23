@@ -7,7 +7,7 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 3; /* 16 */
+    --pairs: 2; /* 16 */
     --stage1-time: 60;
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 2; /* number of questions in puzzle 2 */
@@ -1478,15 +1478,16 @@ grid3.classList.remove('hidden');  // show by removing hidden class
 };
 
 async function nextSimonSequence() {
+
   const availableIcons = buttons3.map(b => b.dataset.icon);
   const newIcon = availableIcons[Math.floor(Math.random() * availableIcons.length)];
   seq3.push(newIcon);
+	buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   info3.textContent = 'Titta på sekvensen…';
   acceptingInput = false;
   buttons3.forEach(b => b.classList.add('disabled'));
   
-  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   
 // show the sequence
@@ -1517,12 +1518,13 @@ for (const icon of seq3) {
 
 function animatePress(el) {
   el.classList.remove('active');
-  void el.offsetWidth; // trigger reflow
+  void el.offsetWidth; // force reflow to restart animation
   el.classList.add('active');
 
+  // Always clean up after 300ms (animation fallback for iOS)
   setTimeout(() => {
     el.classList.remove('active');
-  }, 200); // fallback in case animationend fails
+  }, 300);
 }
 
   /* ===== Initialize ===== */
