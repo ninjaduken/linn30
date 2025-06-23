@@ -306,6 +306,11 @@ button:active {
     background-color: #f9d7e5;
   }
 }
+@media (hover: none), (pointer: coarse) {
+  button:hover {
+    background: inherit; /* or background: transparent; */
+  }
+}
 
 .card,
 .iconBtn {
@@ -1090,6 +1095,7 @@ function showMsg(text, btnText = 'OK', onClose = null) {
     document.body.classList.remove('dark');
   }
   function showMenu() {
+    scrollToTop(); 
     hideAll();
     menu.classList.remove('hidden');
   }
