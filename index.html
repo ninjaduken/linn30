@@ -1095,12 +1095,19 @@ function showMsg(text, btnText = 'OK', onClose = null) {
     secretPage.classList.add('hidden');
     document.body.classList.remove('dark');
   }
-  function showMenu() {
-    hideAll();
-    menu.classList.remove('hidden');
-	setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+ function showMenu() {
+  hideAll();
+  menu.classList.remove('hidden');
 
+  // Try to scroll to top multiple times to counter mobile quirks
+  function scrollToTopRepeated(times = 3, delay = 50) {
+    if (times <= 0) return;
+    window.scrollTo(0, 0);
+    setTimeout(() => scrollToTopRepeated(times - 1, delay), delay);
   }
+  scrollToTopRepeated();
+}
+
   function scrollToTop() {
   window.scrollTo(0, 0);
 }
@@ -1472,11 +1479,7 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-btn.addEventListener('touchstart', () => btn.classList.add('active'));
-btn.addEventListener('touchend', () => {
-  setTimeout(() => btn.classList.remove('active'), 300); // delay removal to let animation finish
-});
-btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
+
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
@@ -1578,6 +1581,9 @@ function animatePress(el) {
 }
 
   /* ===== Initialize ===== */
+  window.addEventListener('load', () => {
+  setTimeout(() => window.scrollTo(0, 0), 100);
+});
   showMenu();
 });
 </script>
