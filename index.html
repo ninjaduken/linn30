@@ -12,7 +12,7 @@
     --seq-count: 1; /* number of questions in puzzle 2 5*/
 	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 22;
+    --stage2-time: 11;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -1543,7 +1543,7 @@ for (const icon of seq3) {
 }
 
   /* --- EXTRA one-shot clean-up --- */
-  // buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
+  buttons3.forEach(b => b.classList.remove('active', 'press-anim'));
 
   info3.textContent = 'Din tur! Repetera sekvensen';
   acceptingInput = true;
