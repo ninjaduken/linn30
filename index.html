@@ -303,13 +303,13 @@
   aspect-ratio: 1 / 1;
   width: 100%;
   font-size: clamp(2rem, 6vw, 2.8rem);
-  background: #ff49b8 !important;
+  background: #ff49b8;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 3px 8px rgb(209 131 184 / .5) !important;
+  box-shadow: 0 3px 8px rgb(209 131 184 / .5);
   border: 2px solid transparent;
   transition: transform .15s ease, background .3s ease;
   /* NEW ↓ — always start at scale(1) and allow the overflow to show */
@@ -328,7 +328,6 @@
   border-color: #ff3388;
   z-index: 20;
   transform-origin: center;
-   border: 3px solid black !important;
 
 }
 @keyframes pressScale {
@@ -1445,8 +1444,11 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-//	btn.addEventListener('touchend', () => btn.classList.remove('active'));
-//	btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
+btn.addEventListener('touchend', () => btn.classList.remove('active'));
+btn.addEventListener('touchcancel', () => btn.classList.remove('active'));
+btn.addEventListener('touchstart', () => {
+  btn.classList.add('active');
+});
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
@@ -1534,13 +1536,14 @@ for (const icon of seq3) {
 
 function animatePress(el) {
   el.classList.remove('active');
-  void el.offsetWidth; // force reflow to restart animation
+  void el.offsetWidth;
   el.classList.add('active');
 
-  // Always clean up after 300ms (animation fallback for iOS)
-  setTimeout(() => {
-    el.classList.remove('active');
-  }, 300);
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      el.classList.remove('active');
+    }, 300);
+  });
 }
 
   /* ===== Initialize ===== */
