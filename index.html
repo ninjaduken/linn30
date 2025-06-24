@@ -339,6 +339,7 @@ button:active {
   will-change: transform, opacity;
   transform-style: preserve-3d;
 }
+
 .iconBtn.active {
   background: #ff49b8 !important; /* or your preferred sequence flash color */
   transform: scale(1.2);
@@ -403,6 +404,10 @@ animation: pressScaleGrow 300ms ease forwards;
   background-color: #ff49b8 !important; /* bright pink highlight */
   border-color: #ff3388 !important;
   animation: pressScaleShrink 150ms ease;
+}
+.iconBtn.press-shrink,
+.iconBtn.flash-grow {
+  transition: none !important; /* temporarily disable transition during animation */
 }
   /* Secret page dark web theme */
   body.dark {
@@ -1509,13 +1514,7 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.textContent = icon;
     btn.dataset.icon = icon;
     btn.disabled = false;
-const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-if (isTouchDevice) {
-  btn.addEventListener('touchstart', () => animatePress(btn));
-} else {
-  btn.addEventListener('mousedown', () => animatePress(btn));
-}
 
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
