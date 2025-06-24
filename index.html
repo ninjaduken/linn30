@@ -9,10 +9,10 @@
   :root {
     --pairs: 1; /* 16 */
     --stage1-time: 60;
-    --seq-count: 2; /* number of questions in puzzle 2 5*/
-	--stage2-cards: 2; /* number of questions in puzzle 2 */
+    --seq-count: 1; /* number of questions in puzzle 2 5*/
+	--stage2-cards: 1; /* number of questions in puzzle 2 */
     --memorise-time: 1;
-    --stage2-time: 333;
+    --stage2-time: 222;
     --stage3-icons: 12;
     --stage3-start-len: 3;
     --stage3-show-time: 800;
@@ -330,7 +330,6 @@ button:active {
   cursor: pointer;
   box-shadow: 0 3px 8px rgb(209 131 184 / .5);
   border: 2px solid transparent;
-  transition: transform .15s ease, background .3s ease;
   transform: scale(1);
   overflow: visible;
   position: relative;
@@ -1515,7 +1514,13 @@ grid3.classList.remove('hidden');  // show by removing hidden class
     btn.dataset.icon = icon;
     btn.disabled = false;
 
+const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
+if (isTouchDevice) {
+  btn.addEventListener('touchstart', () => animatePress(btn));
+} else {
+  btn.addEventListener('mousedown', () => animatePress(btn));
+}
 	  startStage3Btn.style.display = 'none'; // Hide start button
   info3.style.display = 'block';
   grid3.style.display = 'grid';
