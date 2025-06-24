@@ -336,6 +336,7 @@ button:active {
   margin: 0rem;      /* tiny gutter so 1.3× never clips */
   will-change: transform, opacity;
   transform-style: preserve-3d;
+  transition: transform 0.15s ease, background 0.3s ease;
 }
 
 .iconBtn.active {
@@ -350,8 +351,6 @@ button:active {
 }
 @media (hover: none), (pointer: coarse) {
   .iconBtn.active {
-    transform: none;
-    box-shadow: none;
     background: inherit;
     border-color: transparent;
     color: inherit;
