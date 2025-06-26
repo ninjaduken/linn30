@@ -7,16 +7,15 @@
 <style>
   /* === Root & general styles === */
   :root {
-    --pairs: 1; /* 16 */
+    --pairs: 16; /* 16 */
     --stage1-time: 60;
-    --seq-count: 1; /* number of questions in puzzle 2 5*/
-	--stage2-cards: 1; /* number of questions in puzzle 2 */
-    --memorise-time: 1;
-    --stage2-time: 222;
+    --seq-count: 5; /* number of questions in puzzle 2 5*/
+	--stage2-cards: 10; /* number of questions in puzzle 2 10*/
+    --memorise-time: 5;
+    --stage2-time: 60;
     --stage3-icons: 12;
-    --stage3-start-len: 3;
     --stage3-show-time: 800;
-    --stage3-max-level: 14;
+    --stage3-max-level: 15;
   }
   * {
     box-sizing: border-box;
@@ -917,17 +916,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const duck = $('#duckOverlay');        //  <<< add this near top with other elements
   const inputs = $$('#decryptUI input, #decryptUI textarea');
 
-
-
-	//Password
-	
-	const puzzleConfig = {
-  password: 'X',
-  serialNumber: 'XXX',
-  //serialNumber: 'GGJ30X0V70',
+	//Password	
+  const puzzleConfig = {
+  //password: 'X',
+  password: 'maccon',
+  //serialNumber: 'XXX',
+  serialNumber: 'GGJ30X0V70',
+  code: 'DUCKS',
   secretPhrases: {
-    'X X X': 'Ankan flyger i öst',
-    'zen fox leap delta': 'Räven smyger i gryningen'
+    'X X X': 'X',
+    'ned ifs tärek dusn rdena eon': 'Det du söker finns under Nea'
   }
 };
 
@@ -940,7 +938,6 @@ document.addEventListener('DOMContentLoaded', () => {
     memoriseTime: +getComputedStyle(document.documentElement).getPropertyValue('--memorise-time').trim(),
     stage2Time: +getComputedStyle(document.documentElement).getPropertyValue('--stage2-time').trim(),
     stage3Icons: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-icons').trim(),
-    stage3StartLen: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-start-len').trim(),
     stage3Show: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-show-time').trim(),
     stage3Max: +getComputedStyle(document.documentElement).getPropertyValue('--stage3-max-level').trim(),
   };
@@ -1054,7 +1051,7 @@ function celebrateDuck(){
 
   // Emojis for puzzles
   const EMOJI = [
-    '🐶','🐱','🦊','🐼','🐸','🐵','🐧','🦄','🐙','🐝','🦋','🐢','🍎','🍋','🍇','🍓','🥑','🥕','🍕','🍪','⚽','🏀','🎲','🎹','🚗','✈️','🚀','🌈','⭐','🔥','❄️','💎','🎁'
+    '🐶','🐱','🦊','🐼','🐸','🐵','🐧','🦆','🦄','🐙','🐝','🦋','🐢','🍎','🍋','🍇','🍓','🥑','🥕','🍕','🍪','⚽','🏀','🎲','🎹','🚗','✈️','🚀','🌈','⭐','🔥','❄️','💎','🎁'
   ];
 
   // Game State for Puzzle 1 Stage 1
@@ -1145,8 +1142,6 @@ function showMsg(text, btnText = 'OK', onClose = null) {
     startStage1();
   };
 
-
-
   /* ===== Secret Page Events ===== */
 serialSubmitBtn?.addEventListener('click', () => {
 
@@ -1191,14 +1186,14 @@ function updateDecrypt(){
   const key   = codeBoxes.map(b => b.value.toUpperCase()).join('');
   const input = secretInput.value.trim();
 
-  if(key==='DUCKS'){
+  if(key===puzzleConfig.code){
     secretOutput.textContent = puzzleConfig.secretPhrases[input] || '[unknown message]';
 
     // If message actually decrypted (known phrase) => celebrate once
     if(puzzleConfig.secretPhrases[input]){
       celebrateDuck();
       // lil victory sound
-      playSound(880,350);
+      playVictorySound();
     }
   }else{
     // Fake XOR
@@ -1221,6 +1216,47 @@ function updateDecrypt(){
   });
 });
   secretInput.addEventListener('input', updateDecrypt);
+
+function playVictorySound() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playOsc(freq, start, duration, volume, type) {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = freq;
+    osc.type = type;
+    gain.gain.setValueAtTime(volume, ctx.currentTime + start);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + start + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime + start);
+    osc.stop(ctx.currentTime + start + duration);
+  }
+
+  function playLayeredNote(freq, start, duration, volume) {
+    playOsc(freq, start, duration, volume, 'sawtooth');
+    playOsc(freq * 2, start, duration * 0.8, volume * 0.3, 'triangle');
+    playOsc(freq * 1.5, start, duration * 0.8, volume * 0.25, 'square');
+  }
+
+  // Same busy melody without reverb
+  const notes = [
+    [220, 0.00, 0.18, 0.5],  // A3
+    [262, 0.18, 0.15, 0.45], // C4
+    [294, 0.33, 0.15, 0.45], // D4
+    [330, 0.48, 0.18, 0.5],  // E4
+    [370, 0.66, 0.15, 0.45], // F#4
+    [440, 0.81, 0.18, 0.5],  // A4
+    [494, 0.99, 0.15, 0.45], // B4
+    [523, 1.14, 0.15, 0.45], // C5
+    [587, 1.29, 0.2, 0.5],   // D5
+    [659, 1.53, 0.3, 0.5],   // E5
+    [740, 1.83, 0.3, 0.4],   // F#5
+    [880, 2.13, 0.5, 0.45],  // A5 (long finish)
+  ];
+
+  notes.forEach(([f, s, d, v]) => playLayeredNote(f, s, d, v));
+}
 
   /* ===== Puzzle 1 Stage 1 – Find pairs ===== */
   function startStage1() {
@@ -1420,8 +1456,7 @@ function askNextQuestion() {
   }
   const emojiToFind = questionSequence[questionCurrentIndex];
   questionPrompt.innerHTML = `Vart är den här emojin? <span class="bigEmoji">${emojiToFind}</span>`;
-}
-
+  }
   
 function cardClickHandler(e) {
   if (lock) return;
@@ -1548,7 +1583,7 @@ grid3.classList.remove('hidden');  // show by removing hidden class
   setTimeout(() => {
     info3.textContent = 'Titta på sekvensen…';
     nextSimonSequence();
-  }, 1500); // 1.5 seconds delay before sequence starts
+  }, 1000); // 1 second delay before sequence starts
 };
 
 async function nextSimonSequence() {
@@ -1577,7 +1612,6 @@ for (const icon of seq3) {
 animateFlashGrow(btn);
 playSound(523 + Math.random() * 200);
 await delay(config.stage3Show);
-await delay(250);
 }
 
   /* --- EXTRA one-shot clean-up --- */
